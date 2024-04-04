@@ -16,7 +16,7 @@ pygame.init()
 
 # Define constants for the screen width and height
 SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+SCREEN_HEIGHT = 1000
 WALL_WIDTH = 10
 
 # Create the screen object
@@ -44,10 +44,12 @@ while running:
     screen.fill((255, 255, 255))
 
 
-    #pygame.draw.rect(screen, (255,0,0), pygame.Rect(710, 35, WALL_WIDTH, 534))
+    pygame.draw.rect(screen, (255,0,0), pygame.Rect(730, 100, WALL_WIDTH, 850))
+    pygame.draw.rect(screen, (255,0,0), pygame.Rect(780, 100, WALL_WIDTH, 850))
     
-    pygame.draw.rect(screen, (255,0,0), pygame.Rect(780, 35, WALL_WIDTH, 534))
-    pygame.draw.circle(screen, (0, 0, 255), (250, 250), 75)
+    
+    
+    #pygame.draw.circle(screen, (0, 0, 255), (250, 250), 75)
 
     # Flip the display
     pygame.display.flip()
