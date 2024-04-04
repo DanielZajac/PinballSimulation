@@ -7,11 +7,20 @@ import numpy as np
 import math
 
 def rotated_points(point, angle, r_point):
-    Org_point = (point[0] - r_point[0], point[1] - r_point[1]) #
-    x_ = (Org_point[0]* math.cos(math.radians(angle))) - (Org_point[1]* math.cos(math.radians(angle)))
-    y_ = (Org_point[0]* math.sin(math.radians(angle))) + (Org_point[1]* math.cos(math.radians(angle)))
-    print(f'Mouse clicked at ({x_ + r_point[0]}, { y_ + r_point[1]})')
-    return ((x_ + r_point[0], y_ + r_point[1]))
+    # Calculate the relative coordinates of the original point with respect to the reference point
+    Org_point = (point[0] - r_point[0], point[1] - r_point[1])
+    
+    # Calculate the rotated coordinates using correct trigonometric functions
+    x_ = Org_point[0] * math.cos(math.radians(angle)) - Org_point[1] * math.sin(math.radians(angle))
+    y_ = Org_point[0] * math.sin(math.radians(angle)) + Org_point[1] * math.cos(math.radians(angle))
+    
+    # Add the coordinates of the reference point back to get the final rotated coordinates
+    rotated_x = x_ + r_point[0]
+    rotated_y = y_ + r_point[1]
+    
+
+    
+    return (rotated_x, rotated_y)
     
 
 from pygame.locals import (
@@ -34,7 +43,8 @@ PINB_RIGHT = 0
 PINB_TOP = 50
 PINB_BOTTOM = 0
 
-L_ANGLE = 0
+L_angle_start = 0
+L_angle = L_angle_start
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -42,6 +52,19 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 # Run until the user asks to quit
 running = True
 while running:
+    
+    keys = pygame.key.get_pressed()
+    if keys[K_LEFT]:
+        if L_angle < L_angle_start + 45:
+            L_angle += 1
+        elif L_angle == L_angle_start:
+            L_angle = L_angle_start
+    if L_angle == L_angle_start and not keys[K_LEFT]:
+        L_angle = L_angle
+    elif L_angle > L_angle_start and not keys[K_LEFT]:
+        L_angle -= 1
+    
+    
 
     # Did the user click the window close button?
     for event in pygame.event.get():
@@ -69,8 +92,8 @@ while running:
     pygame.draw.polygon(screen, (255,0,0), ((35, 50),(35, 150),(145, 50))) #top left triangle
     pygame.draw.polygon(screen, (255,0,0), ((35, 950),(35, 770),(255, 950))) #bottom left triangle
     pygame.draw.polygon(screen, (255,0,0), ((730, 950),(730, 770),(510, 950))) #bottom right triangle
-    l_rotated_point = (201, 906)
-    pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930), L_ANGLE, l_rotated_point), rotated_points((200, 890), L_ANGLE, l_rotated_point), rotated_points((320, 910), L_ANGLE, l_rotated_point))) #left bumper
+    l_rotated_point = (201, 910)
+    pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930), L_angle, l_rotated_point), rotated_points((200, 890), L_angle, l_rotated_point), rotated_points((320, 910), L_angle, l_rotated_point))) #left bumper
     pygame.draw.polygon(screen, (0,0,0), ((550, 890),(550, 930),(435, 910))) #right bumper
     
     l_x_offset = 10
