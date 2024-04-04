@@ -16,13 +16,13 @@ from datetime import datetime
 shapes = []
 
 
-def better_collision(ball_pos_start, ball_pos_end, ball_direction, ball_radius):
+def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius):
     #need to find out the 'left' and 'right' sides of the ball, if we consider the 'top' the point mostforward in the direction the ball is going
     #to do this, find the line perpindicular to the balls direction, and go 'radius' units in the positive and negative direction
     
     #make the ball direction unit vector
-    length_ball_direction = np.sqrt(ball_direction[0]**2 + ball_direction[1]**2)
-    ball_direction_unit = [ball_direction[0]/length_ball_direction, ball_direction[1]/length_ball_direction]
+    length_ball_direction = np.sqrt(ball_velocity[0]**2 + ball_velocity[1]**2)
+    ball_direction_unit = [ball_velocity[0]/length_ball_direction, ball_velocity[1]/length_ball_direction]
 
     #finding the right and left vector directions
     right_direction = [ball_direction_unit[1], -ball_direction_unit[0]]
@@ -73,7 +73,7 @@ def better_collision(ball_pos_start, ball_pos_end, ball_direction, ball_radius):
                         y_intersect >= min(point1[1], point2[1]) and y_intersect <= max(point1[1], point2[1]) and
                         x_intersect >= min(shape[i][0], shape[i+1][0]) and x_intersect <= max(shape[i][0], shape[i+1][0]) and
                         y_intersect >= min(shape[i][1], shape[i+1][1]) and y_intersect <= max(shape[i][1], shape[i+1][1])):
-                        potential_lines.append(shape[i], shape[i+1], x_intersect, y_intersect)
+                        potential_lines.append(shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope)
                         #adding the two vertices line to the list of potential first contacts, and their intersect
 
             if len(potential_lines) != 0:
@@ -86,4 +86,30 @@ def better_collision(ball_pos_start, ball_pos_end, ball_direction, ball_radius):
                         closest_line = line
                         min_distance_to_intersection = distance_to_line
 
-    return True
+            #now find which direction the response force is in
+            #note that we only need to apply a force as a response since our collisions in the pinball machine are 'powered by the machine (not just static walls)'
+            #also note that the force will therefore always be away and perpindicular from the wall
+
+            #find unit vector in the direction of the wall (doesn't matter which way along the wall it is since we are just using it to find 2 perpindicular lines)
+            collision_wall_line_vector = [closest_line[0][0] - closest_line[1][0], closest_line[0][1] - closest_line[1][1]]
+            collision_wall_line_vector_length = np.sqrt((collision_wall_line_vector[0])**2 + (collision_wall_line_vector[1])**2)
+            collision_wall_line_vector_unit = [collision_wall_line_vector[0]/collision_wall_line_vector_length, collision_wall_line_vector[1]/collision_wall_line_vector_length]
+
+            #finding the two perpindicular lines to our wall (which are also unit vectors)
+            perpindicular_collision_line1 = [-collision_wall_line_vector_unit[1], collision_wall_line_vector_unit[0]]
+            perpindicular_collision_line2 = [collision_wall_line_vector_unit[1], -collision_wall_line_vector_unit[0]]
+
+            #to find which perpindicular direction is correct, find the dot product between the line and the ball's velocity
+            #whichever dot product is less than zero means that line (generally) opposes the ball's velocity (their angle between is >90 degrees)
+            #we want to find that line because the ball cannot have a collision with a wall which is facing the same direction as velocity (shown in report)
+            if np.dot(perpindicular_collision_line1, ball_velocity) < 0:
+                response_direction = perpindicular_collision_line1
+            else:
+                response_direction = perpindicular_collision_line2
+
+            force_strength = 10
+            response_force = force_strength*response_direction
+
+
+            collision_dt = "temp"
+    return True, response_force, collision_dt
