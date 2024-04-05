@@ -40,7 +40,7 @@ m = 1
 radius = 10
  
 #World properties
-dt = 0.01
+dt = 0.005
 G = 9.8
 
 def ball_update():
@@ -56,7 +56,8 @@ def ball_update():
     
     if isCollision:
         #if there was a collision, use the updated collision returned by the function
-        vel = new_velocity
+        vel[0] = -new_velocity[0]
+        vel[1] = -new_velocity[1]
     else:
         #default velocity update
         vel[0] += (dt * (-(g/m) * vel[0])) 
@@ -77,7 +78,7 @@ def rotated_points(point, angle, r_point):
     return (rotated_x, rotated_y)
     
 def Rect_coords(top, left, width, height):
-    return [[left,top],[left,top+height],[left+width,top],[left+width,top+height]]
+    return  [[top,left],[top+height,left],[top,left+width],[top+height,left+width]] #rect coords switched
     
 from pygame.locals import (
     K_LEFT,
@@ -179,7 +180,6 @@ while running:
     pygame.draw.polygon(screen, (0,255,0), (rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345)), rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345)),  rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345)),  rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345)),  rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345)),  rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345)),  rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345)))) #l bumper
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
-    prev_coords = pos
     ball_update()
     
     #print(pos)
