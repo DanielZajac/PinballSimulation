@@ -61,9 +61,6 @@ def ball_update():
         #default velocity update
         vel[0] += (dt * (-(g/m) * vel[0])) 
         vel[1] += (dt * (-((g/m) * vel[1]) + G))
-    
-    
-    
 
 def rotated_points(point, angle, r_point):
     # Calculate the relative coordinates of the original point with respect to the reference point
@@ -77,11 +74,9 @@ def rotated_points(point, angle, r_point):
     rotated_x = x_ + r_point[0]
     rotated_y = y_ + r_point[1]
     
-
-    
     return (rotated_x, rotated_y)
     
-def Rect_coords(top , left , width, height):
+def Rect_coords(top, left, width, height):
     return [[left,top],[left,top+height],[left+width,top],[left+width,top+height]]
     
 from pygame.locals import (
@@ -103,6 +98,7 @@ def init():
     # [-2] left bumper, [-1] right bumper
     
     shapes.append(Rect_coords(730, 250, WALL_WIDTH, 700)) #inner wall
+    print(shapes[0])
     shapes.append(Rect_coords(780, PINB_TOP, WALL_WIDTH, 900)) #right wall
     shapes.append(Rect_coords(PINB_LEFT, PINB_TOP, WALL_WIDTH, 900)) #left wall
     shapes.append(Rect_coords(730, 940, 60, WALL_WIDTH)) # bottom wall
@@ -186,7 +182,7 @@ while running:
     prev_coords = pos
     ball_update()
     
-    print(pos)
+    #print(pos)
 
     
     #

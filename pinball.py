@@ -7,15 +7,13 @@ import numpy as np
 
 def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes):
     #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
-    #new comment
 
     for shape in shapes:
-        print(shape)
         shape.append(shape[0])
 
     #need to find out the 'left' and 'right' sides of the ball, if we consider the 'top' the point mostforward in the direction the ball is going
     #to do this, find the line perpindicular to the balls direction, and go 'radius' units in the positive and negative direction
-    
+
     #make the ball direction unit vector
     length_ball_direction = np.sqrt(ball_velocity[0]**2 + ball_velocity[1]**2)
     ball_direction_unit = [ball_velocity[0]/length_ball_direction, ball_velocity[1]/length_ball_direction]
@@ -53,6 +51,16 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         for shape in shapes:
             #for each shape we will check each line (each adjacent pair of vertices), note that the last index is the first again (so that we don't miss the final line)
             for i in range(len(shape)-1):
+
+                #######
+                if shape[i+1] == [250, 1430] and shape[i] == [250, 730]:
+                    #print(point1[0], point2[0])
+                    a = 1
+
+                #######
+
+
+
                 shape_line_slope = (shape[i][1]-shape[i+1][1])/(shape[i][0]-shape[i+1][0]) if shape[i][0] - shape[i+1][0] != 0 else float('inf')
                 if point_line_slope == float('inf'): #point line (travel path) is vertical
                     x_intersect = point1[0]
@@ -61,18 +69,23 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
                     x_intersect = shape[i][0]
                     y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
                 else:
-                    x_intersect = (point_line_slope * point1[0] - shape_line_slope * shape[i][0] + shape[i][1] - point1[1]) / (point_line_slope - shape_line_slope)
-                    y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
+                    if (point_line_slope - shape_line_slope) == 0:
+                        x_intersect = float('inf')
+                        y_intersect = float('inf')
+                    else:
+                        x_intersect = (point_line_slope * point1[0] - shape_line_slope * shape[i][0] + shape[i][1] - point1[1]) / (point_line_slope - shape_line_slope)
+                        y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
                 
-                #checking if the intersection point is within the acutal line, not far off in the distance
+                #checking if the intersection point is within the actual line, not far off in the distance
                 if (x_intersect >= min(point1[0], point2[0]) and x_intersect <= max(point1[0], point2[0]) and
                     y_intersect >= min(point1[1], point2[1]) and y_intersect <= max(point1[1], point2[1]) and
                     x_intersect >= min(shape[i][0], shape[i+1][0]) and x_intersect <= max(shape[i][0], shape[i+1][0]) and
                     y_intersect >= min(shape[i][1], shape[i+1][1]) and y_intersect <= max(shape[i][1], shape[i+1][1])):
-                    potential_lines.append(shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope)
+                    potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope])
                     #adding the two vertices line to the list of potential first contacts, and their intersect
 
     if len(potential_lines) != 0:
+        print("hi im a potential line")
         min_distance_to_intersection = 10000000000
         for line in potential_lines:
             #now we want to check which intersection point is closest to the center of the ball's starting position
