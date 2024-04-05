@@ -59,7 +59,7 @@ def ball_update():
         vel = new_velocity
     else:
         #default velocity update
-        vel[0] += (dt * (-(g/m) * vel[0])) 
+        vel[0] += (dt * (-(g/m) * vel[0]))
         vel[1] += (dt * (-((g/m) * vel[1]) + G))
 
 def rotated_points(point, angle, r_point):
