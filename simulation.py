@@ -44,14 +44,22 @@ dt = 0.005
 G = 9.8
 
 def ball_update():
+
+    prev_pos = pos
     
     #position update
     pos[0] += (dt * vel[0])
     pos[1] += (dt * vel[1])
+
+    isCollision, new_velocity, time_to_collision = pinball.better_collision(prev_pos, pos, vel, radius)
     
-    #velocity update
-    vel[0] += (dt * (-(g/m) * vel[0])) 
-    vel[1] += (dt * (-((g/m) * vel[1]) + G))
+    if isCollision:
+        #if there was a collision, use the updated collision returned by the function
+        vel = new_velocity
+    else:
+        #default velocity update
+        vel[0] += (dt * (-(g/m) * vel[0])) 
+        vel[1] += (dt * (-((g/m) * vel[1]) + G))
     
     
     

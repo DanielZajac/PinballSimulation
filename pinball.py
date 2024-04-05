@@ -121,7 +121,7 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius):
         new_velocity = [(response_direction[0]*force_strength)+perpendicular_component[0], (response_direction[1]*force_strength)+perpendicular_component[1]]
 
 
-        
+
         collision_dt = "temp"
 
         return True, new_velocity, collision_dt
