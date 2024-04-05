@@ -3,20 +3,15 @@ author 1: Daniel Zajac - 100820183
 author 2: Heisn Nithysingha - 100817036
 """
 
-import pygame
-import math
-import sys
-import matplotlib.pyplot as plt
 import numpy as np
-from scipy.integrate import ode
-import random
-from datetime import datetime
 
-#we will store all of our shapes, and each shape will be a list of vertices (each with an x and y)
-shapes = []
+def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes):
+    #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
 
+    for shape in shapes:
+        print(shape)
+        shape.append(shape[0])
 
-def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius):
     #need to find out the 'left' and 'right' sides of the ball, if we consider the 'top' the point mostforward in the direction the ball is going
     #to do this, find the line perpindicular to the balls direction, and go 'radius' units in the positive and negative direction
     

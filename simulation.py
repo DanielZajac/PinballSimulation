@@ -33,17 +33,18 @@ R_angle_start = -45
 R_angle = R_angle_start
 
 #Ball properties
-vel = [200,-50]
-pos = [0,200]
+vel = [400,-50]
+pos = [150,450]
 g = 0.25 # gamma (Drag Coeff)
 m = 1
 radius = 10
  
 #World properties
-dt = 0.005
+dt = 0.01
 G = 9.8
 
 def ball_update():
+    global vel
 
     prev_pos = pos
     
@@ -51,7 +52,7 @@ def ball_update():
     pos[0] += (dt * vel[0])
     pos[1] += (dt * vel[1])
 
-    isCollision, new_velocity, time_to_collision = pinball.better_collision(prev_pos, pos, vel, radius)
+    isCollision, new_velocity, time_to_collision = pinball.better_collision(prev_pos, pos, vel, radius, shapes)
     
     if isCollision:
         #if there was a collision, use the updated collision returned by the function
@@ -83,16 +84,12 @@ def rotated_points(point, angle, r_point):
 def Rect_coords(top , left , width, height):
     return [[left,top],[left,top+height],[left+width,top],[left+width,top+height]]
     
-
-
-
 from pygame.locals import (
     K_LEFT,
     K_RIGHT,
     KEYDOWN,
     K_ESCAPE,
 )
-
 
 pygame.init()
 
@@ -104,7 +101,6 @@ def init():
     # Order of List: Inner wall, R wall, L wall, Bottom wall, top wall, 
     # Top r tri, top l tri, bot l tri, bot r tri, diamond bumper, L bumper
     # [-2] left bumper, [-1] right bumper
-    
     
     shapes.append(Rect_coords(730, 250, WALL_WIDTH, 700)) #inner wall
     shapes.append(Rect_coords(780, PINB_TOP, WALL_WIDTH, 900)) #right wall
@@ -118,13 +114,10 @@ def init():
     shapes.append([[730, 949],[730, 770],[510, 949]]) #bottom right triangle
     
     shapes.append([[164, 243],[140, 264], [190, 310], [241, 264], [217, 243]]) #diamond bumper
-    shapes.append([[rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345))], [rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345))], [rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345))],  [rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345))],  [rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345))],  [rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345))],  [rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345))]]) #L bumper
+    shapes.append([list(rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345))),list(rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345))), list(rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345))), list(rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345))),  list(rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345))),  list(rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345))), list(rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345)))]) #L bumper
     
-    shapes.append([[rotated_points((200, 930), L_angle, l_rotated_point)],[rotated_points((200, 890), L_angle, l_rotated_point)],[rotated_points((320, 910), L_angle, l_rotated_point)]]) #left bumper (moving)
-    shapes.append([[rotated_points((550, 890), R_angle, r_rotated_point)],[rotated_points((550, 930), R_angle, r_rotated_point)],[rotated_points((435, 910), R_angle, r_rotated_point)]]) #Right bumper (moving)
-    
-    
-
+    shapes.append([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left bumper (moving)
+    shapes.append([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right bumper (moving)
 
 # Run until the user asks to quit
 running = True
@@ -180,10 +173,10 @@ while running:
     pygame.draw.polygon(screen, (255,0,0), ((730, 949),(730, 770),(510, 949))) #bottom right triangle
 
     pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930), L_angle, l_rotated_point), rotated_points((200, 890), L_angle, l_rotated_point), rotated_points((320, 910), L_angle, l_rotated_point))) #left bumper
-    shapes[-2] = ([[rotated_points((200, 930), L_angle, l_rotated_point)],[rotated_points((200, 890), L_angle, l_rotated_point)],[rotated_points((320, 910), L_angle, l_rotated_point)]]) #left bumper (moving)
+    shapes[-2] = ([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left bumper (moving)
     
     pygame.draw.polygon(screen, (0,0,0), (rotated_points((550, 890), R_angle, r_rotated_point), rotated_points((550, 930),  R_angle, r_rotated_point), rotated_points((435, 910), R_angle, r_rotated_point))) #Right bumper
-    shapes[-1] = ([[rotated_points((550, 890), R_angle, r_rotated_point)],[rotated_points((550, 930), R_angle, r_rotated_point)],[rotated_points((435, 910), R_angle, r_rotated_point)]]) #Right bumper (moving)
+    shapes[-1] = ([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right bumper (moving)
 
         
     pygame.draw.polygon(screen, (0,255,0), ((164, 243),(140, 264), (190, 310), (241, 264), (217, 243))) #diamond bumper
