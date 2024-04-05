@@ -52,16 +52,6 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
             #for each shape we will check each line (each adjacent pair of vertices), note that the last index is the first again (so that we don't miss the final line)
             for i in range(len(shape)-1):
 
-                #######
-                if shape[i+1] == [740, 250] and shape[i] == [730, 250]:
-                    print(point1[0], point2[0])
-                    if point1[0] < 730 and point2[0] >= 730:
-                        print("hi")
-
-                #######
-
-
-
                 shape_line_slope = (shape[i][1]-shape[i+1][1])/(shape[i][0]-shape[i+1][0]) if shape[i][0] - shape[i+1][0] != 0 else float('inf')
                 if point_line_slope == float('inf'): #point line (travel path) is vertical
                     x_intersect = point1[0]
@@ -86,9 +76,9 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
                     #adding the two vertices line to the list of potential first contacts, and their intersect
 
     if len(potential_lines) != 0:
-        print("hi im a potential line")
         min_distance_to_intersection = 10000000000
         for line in potential_lines:
+
             #now we want to check which intersection point is closest to the center of the ball's starting position
             distance_to_line = np.sqrt((line[2]-ball_pos_start[0])**2 + (line[3]-ball_pos_end[1])**2)
 
@@ -128,7 +118,7 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         #calculting velocity after force is applied in direction of platform's normal vector
         force_strength = 10
         #disregard the parallel component, replace it with a force in parallel direction and add it to the perpendicular component
-        new_velocity = [(response_direction[0]*force_strength)+perpendicular_component[0], (response_direction[1]*force_strength)+perpendicular_component[1]]
+        new_velocity = [(response_direction[0]*force_strength)+(-parallel_component[0])+perpendicular_component[0], (response_direction[1]*force_strength)+(-parallel_component[1])+perpendicular_component[1]]
 
 
 

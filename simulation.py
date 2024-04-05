@@ -34,18 +34,23 @@ R_angle_start = -45
 R_angle = R_angle_start
 
 #Ball properties
-vel = [400,-50]
-pos = [150,450]
-g = 0.25 # gamma (Drag Coeff)
+vel = [60,-5]
+pos = [300,320]
+g = 0.05 # gamma (Drag Coeff)
 m = 1
 radius = 10
  
 #World properties
-dt = 0.005
+dt = 0.05
 G = 9.8
 
+#don't want collisions to happen too close together for now (temporary)
+collision_buffer = 0
 def ball_update():
-    global vel
+    global collision_buffer
+
+    if collision_buffer > 0:
+        collision_buffer -= 1
 
     prev_pos = copy.deepcopy(pos)
     
@@ -55,10 +60,11 @@ def ball_update():
 
     isCollision, new_velocity, time_to_collision = pinball.better_collision(prev_pos, pos, vel, radius, shapes)
     
-    if isCollision:
+    if isCollision and collision_buffer == 0:
+        collision_buffer = 10
         #if there was a collision, use the updated collision returned by the function
-        vel[0] = -new_velocity[0]
-        vel[1] = -new_velocity[1]
+        vel[0] = new_velocity[0]
+        vel[1] = new_velocity[1]
     else:
         #default velocity update
         vel[0] += (dt * (-(g/m) * vel[0]))
@@ -100,7 +106,6 @@ def init():
     # [-2] left bumper, [-1] right bumper
     
     shapes.append(Rect_coords(730, 250, WALL_WIDTH, 700)) #inner wall
-    print(shapes[0])
     shapes.append(Rect_coords(780, PINB_TOP, WALL_WIDTH, 900)) #right wall
     shapes.append(Rect_coords(PINB_LEFT, PINB_TOP, WALL_WIDTH, 900)) #left wall
     shapes.append(Rect_coords(730, 940, 60, WALL_WIDTH)) # bottom wall
@@ -126,21 +131,21 @@ while running:
     keys = pygame.key.get_pressed()
     if keys[K_LEFT]:
         if L_angle > L_angle_start - 45:
-            L_angle -= 1
+            L_angle -= 3
         elif L_angle == L_angle_start:
             L_angle = L_angle_start
     
     if L_angle <= L_angle_start and not keys[K_LEFT]: #falls back to resting position
-        L_angle += 0.03
+        L_angle += 2
         
     if keys[K_RIGHT]:
         if R_angle < R_angle_start + 45:
-            R_angle += 1
+            R_angle += 3
         elif R_angle == R_angle_start:
             R_angle = R_angle_start
     
     if R_angle >= R_angle_start and not keys[K_RIGHT]: #falls back to resting position
-        R_angle -= 0.03
+        R_angle -= 2
     
     
 
@@ -185,9 +190,6 @@ while running:
     
     #print(pos)
 
-    
-    #
-    
     # Flip the display
     pygame.display.flip()
 
