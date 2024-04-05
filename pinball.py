@@ -39,77 +39,95 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius):
 
     #now we want to check if any shape lines intersect these 'boundary lines' of our ball's travel path
 
+    #this will store the lines which intersect at least one of the ball's boundary lines on its travel path
+    potential_lines = []
+
     for i in range(2):
-            if (i == 0):
-                point1 = left_pos_start
-                point2 = left_pos_end
-            else:
-                point1 = right_pos_start
-                point2 = right_pos_end
-            
-            #find slope of our travel path line
-            point_line_slope = (point2[1]-point1[1])/(point2[0]-point1[0]) if point2[0] - point1[0] != 0 else float('inf')
+        if (i == 0):
+            point1 = left_pos_start
+            point2 = left_pos_end
+        else:
+            point1 = right_pos_start
+            point2 = right_pos_end
+        
+        #find slope of our travel path line
+        point_line_slope = (point2[1]-point1[1])/(point2[0]-point1[0]) if point2[0] - point1[0] != 0 else float('inf')
 
-            #this will store the lines which intersect at least one of the ball's boundary lines on its travel path
-            potential_lines = []
+        #now we iterate through all shapes in our pinball machine
+        for shape in shapes:
+            #for each shape we will check each line (each adjacent pair of vertices), note that the last index is the first again (so that we don't miss the final line)
+            for i in range(len(shape)-1):
+                shape_line_slope = (shape[i][1]-shape[i+1][1])/(shape[i][0]-shape[i+1][0]) if shape[i][0] - shape[i+1][0] != 0 else float('inf')
+                if point_line_slope == float('inf'): #point line (travel path) is vertical
+                    x_intersect = point1[0]
+                    y_intersect = shape_line_slope * (x_intersect - shape[i][0]) + shape[i][1]
+                elif shape_line_slope == float('inf'): #line between shape vertices is vertical
+                    x_intersect = shape[i][0]
+                    y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
+                else:
+                    x_intersect = (point_line_slope * point1[0] - shape_line_slope * shape[i][0] + shape[i][1] - point1[1]) / (point_line_slope - shape_line_slope)
+                    y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
+                
+                #checking if the intersection point is within the acutal line, not far off in the distance
+                if (x_intersect >= min(point1[0], point2[0]) and x_intersect <= max(point1[0], point2[0]) and
+                    y_intersect >= min(point1[1], point2[1]) and y_intersect <= max(point1[1], point2[1]) and
+                    x_intersect >= min(shape[i][0], shape[i+1][0]) and x_intersect <= max(shape[i][0], shape[i+1][0]) and
+                    y_intersect >= min(shape[i][1], shape[i+1][1]) and y_intersect <= max(shape[i][1], shape[i+1][1])):
+                    potential_lines.append(shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope)
+                    #adding the two vertices line to the list of potential first contacts, and their intersect
 
-            #now we iterate through all shapes in our pinball machine
-            for shape in shapes:
-                #for each shape we will check each line (each adjacent pair of vertices), note that the last index is the first again (so that we don't miss the final line)
-                for i in range(len(shape)-1):
-                    shape_line_slope = (shape[i][1]-shape[i+1][1])/(shape[i][0]-shape[i+1][0]) if shape[i][0] - shape[i+1][0] != 0 else float('inf')
-                    if point_line_slope == float('inf'): #point line (travel path) is vertical
-                        x_intersect = point1[0]
-                        y_intersect = shape_line_slope * (x_intersect - shape[i][0]) + shape[i][1]
-                    elif shape_line_slope == float('inf'): #line between shape vertices is vertical
-                        x_intersect = shape[i][0]
-                        y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
-                    else:
-                        x_intersect = (point_line_slope * point1[0] - shape_line_slope * shape[i][0] + shape[i][1] - point1[1]) / (point_line_slope - shape_line_slope)
-                        y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
-                    
-                    #checking if the intersection point is within the acutal line, not far off in the distance
-                    if (x_intersect >= min(point1[0], point2[0]) and x_intersect <= max(point1[0], point2[0]) and
-                        y_intersect >= min(point1[1], point2[1]) and y_intersect <= max(point1[1], point2[1]) and
-                        x_intersect >= min(shape[i][0], shape[i+1][0]) and x_intersect <= max(shape[i][0], shape[i+1][0]) and
-                        y_intersect >= min(shape[i][1], shape[i+1][1]) and y_intersect <= max(shape[i][1], shape[i+1][1])):
-                        potential_lines.append(shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope)
-                        #adding the two vertices line to the list of potential first contacts, and their intersect
+    if len(potential_lines) != 0:
+        min_distance_to_intersection = 10000000000
+        for line in potential_lines:
+            #now we want to check which intersection point is closest to the center of the ball's starting position
+            distance_to_line = np.sqrt((line[2]-ball_pos_start[0])**2 + (line[3]-ball_pos_end[1])**2)
 
-            if len(potential_lines) != 0:
-                min_distance_to_intersection = 10000000000
-                for line in potential_lines:
-                    #now we want to check which intersection point is closest to the center of the ball's starting position
-                    distance_to_line = np.sqrt((line[2]-ball_pos_start[0])**2 + (line[3]-ball_pos_end[1])**2)
+            if distance_to_line < min_distance_to_intersection:
+                closest_line = line
+                min_distance_to_intersection = distance_to_line
 
-                    if distance_to_line < min_distance_to_intersection:
-                        closest_line = line
-                        min_distance_to_intersection = distance_to_line
+        #now find which direction the response force is in
+        #note that we only need to apply a force as a response since our collisions in the pinball machine are 'powered by the machine (not just static walls)'
+        #also note that the force will therefore always be away and perpindicular from the wall
 
-            #now find which direction the response force is in
-            #note that we only need to apply a force as a response since our collisions in the pinball machine are 'powered by the machine (not just static walls)'
-            #also note that the force will therefore always be away and perpindicular from the wall
+        #find unit vector in the direction of the wall (doesn't matter which way along the wall it is since we are just using it to find 2 perpindicular lines)
+        collision_wall_line_vector = [closest_line[0][0] - closest_line[1][0], closest_line[0][1] - closest_line[1][1]]
+        collision_wall_line_vector_length = np.sqrt((collision_wall_line_vector[0])**2 + (collision_wall_line_vector[1])**2)
+        collision_wall_line_vector_unit = [collision_wall_line_vector[0]/collision_wall_line_vector_length, collision_wall_line_vector[1]/collision_wall_line_vector_length]
 
-            #find unit vector in the direction of the wall (doesn't matter which way along the wall it is since we are just using it to find 2 perpindicular lines)
-            collision_wall_line_vector = [closest_line[0][0] - closest_line[1][0], closest_line[0][1] - closest_line[1][1]]
-            collision_wall_line_vector_length = np.sqrt((collision_wall_line_vector[0])**2 + (collision_wall_line_vector[1])**2)
-            collision_wall_line_vector_unit = [collision_wall_line_vector[0]/collision_wall_line_vector_length, collision_wall_line_vector[1]/collision_wall_line_vector_length]
+        #finding the two perpindicular lines to our wall (which are also unit vectors)
+        perpindicular_collision_line1 = [-collision_wall_line_vector_unit[1], collision_wall_line_vector_unit[0]]
+        perpindicular_collision_line2 = [collision_wall_line_vector_unit[1], -collision_wall_line_vector_unit[0]]
 
-            #finding the two perpindicular lines to our wall (which are also unit vectors)
-            perpindicular_collision_line1 = [-collision_wall_line_vector_unit[1], collision_wall_line_vector_unit[0]]
-            perpindicular_collision_line2 = [collision_wall_line_vector_unit[1], -collision_wall_line_vector_unit[0]]
+        #to find which perpindicular direction is correct, find the dot product between the line and the ball's velocity
+        #whichever dot product is less than zero means that line (generally) opposes the ball's velocity (their angle between is >90 degrees)
+        #we want to find that line because the ball cannot have a collision with a wall which is facing the same direction as velocity (shown in report)
+        if np.dot(perpindicular_collision_line1, ball_velocity) < 0:
+            response_direction = perpindicular_collision_line1
+        else:
+            response_direction = perpindicular_collision_line2
+        
+        response_direction = np.array(response_direction)
+        ball_velocity = np.array(ball_velocity)
 
-            #to find which perpindicular direction is correct, find the dot product between the line and the ball's velocity
-            #whichever dot product is less than zero means that line (generally) opposes the ball's velocity (their angle between is >90 degrees)
-            #we want to find that line because the ball cannot have a collision with a wall which is facing the same direction as velocity (shown in report)
-            if np.dot(perpindicular_collision_line1, ball_velocity) < 0:
-                response_direction = perpindicular_collision_line1
-            else:
-                response_direction = perpindicular_collision_line2
-
-            force_strength = 10
-            response_force = force_strength*response_direction
+        #calculate the component of velocity parallel to the normal
+        parallel_component = np.dot(ball_velocity, response_direction) * response_direction
+        #calculate the component of velocity perpendicular to the normal
+        perpendicular_component = ball_velocity - parallel_component
+        
+        #calculting velocity after force is applied in direction of platform's normal vector
+        force_strength = 10
+        #disregard the parallel component, replace it with a force in parallel direction and add it to the perpendicular component
+        new_velocity = [(response_direction[0]*force_strength)+perpendicular_component[0], (response_direction[1]*force_strength)+perpendicular_component[1]]
 
 
-            collision_dt = "temp"
-    return True, response_force, collision_dt
+        
+        collision_dt = "temp"
+
+        return True, new_velocity, collision_dt
+    else:
+        #now if there was no collision in the path, check for collisions near the end of the ball's travel
+        a = 1
+
+
+    return False, [0, 0], 0
