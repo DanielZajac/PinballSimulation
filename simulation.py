@@ -5,6 +5,7 @@ import pygame
 import pinball
 import numpy as np
 import math
+import copy
 
 # Define constants for the screen width and height
 SCREEN_WIDTH = 800
@@ -46,7 +47,7 @@ G = 9.8
 def ball_update():
     global vel
 
-    prev_pos = pos
+    prev_pos = copy.deepcopy(pos)
     
     #position update
     pos[0] += (dt * vel[0])

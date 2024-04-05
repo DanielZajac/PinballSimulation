@@ -53,9 +53,10 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
             for i in range(len(shape)-1):
 
                 #######
-                if shape[i+1] == [250, 1430] and shape[i] == [250, 730]:
-                    #print(point1[0], point2[0])
-                    a = 1
+                if shape[i+1] == [740, 250] and shape[i] == [730, 250]:
+                    print(point1[0], point2[0])
+                    if point1[0] < 730 and point2[0] >= 730:
+                        print("hi")
 
                 #######
 
