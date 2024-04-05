@@ -1,6 +1,6 @@
 """
 author 1: Daniel Zajac - 100820183
-author 2s: Heisn Nithysingha - 100817036
+author 2: Heisn Nithysingha - 100817036
 """
 
 import pygame

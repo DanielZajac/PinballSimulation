@@ -6,7 +6,56 @@ import pinball
 import numpy as np
 import math
 
-shapes = []
+# Define constants for the screen width and height
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 1000
+WALL_WIDTH = 10
+
+PINB_LEFT = 35
+PINB_RIGHT = 0
+PINB_TOP = 50
+PINB_BOTTOM = 0
+
+shapes = [] #List with all shape coords
+
+#Left Bumper properties
+l_x_offset = 10
+l_y_offset = 20
+l_rotated_point = (201, 910)
+L_angle_start = 45
+L_angle = L_angle_start
+
+#Right Bumper properties
+r_x_offset = 10
+r_y_offset = 20
+r_rotated_point = (549, 907)
+R_angle_start = -45
+R_angle = R_angle_start
+
+#Ball properties
+vel = [200,-50]
+pos = [0,200]
+g = 0.25 # gamma (Drag Coeff)
+m = 1
+radius = 10
+ 
+#World properties
+dt = 0.005
+G = 9.8
+
+def ball_update():
+    
+    #position update
+    pos[0] += (dt * vel[0])
+    pos[1] += (dt * vel[1])
+    
+    #velocity update
+    vel[0] += (dt * (-(g/m) * vel[0])) 
+    vel[1] += (dt * (-((g/m) * vel[1]) + G))
+    
+    
+    
+
 def rotated_points(point, angle, r_point):
     # Calculate the relative coordinates of the original point with respect to the reference point
     Org_point = (point[0] - r_point[0], point[1] - r_point[1])
@@ -39,32 +88,6 @@ from pygame.locals import (
 
 pygame.init()
 
-# Define constants for the screen width and height
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 1000
-WALL_WIDTH = 10
-
-PINB_LEFT = 35
-PINB_RIGHT = 0
-PINB_TOP = 50
-PINB_BOTTOM = 0
-
-
-
-#Left Bumper properties
-l_x_offset = 10
-l_y_offset = 20
-l_rotated_point = (201, 910)
-L_angle_start = 45
-L_angle = L_angle_start
-
-#Right Bumper properties
-r_x_offset = 10
-r_y_offset = 20
-r_rotated_point = (549, 907)
-R_angle_start = -45
-R_angle = R_angle_start
-
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -93,6 +116,7 @@ def init():
     shapes.append([[rotated_points((550, 890), R_angle, r_rotated_point)],[rotated_points((550, 930), R_angle, r_rotated_point)],[rotated_points((435, 910), R_angle, r_rotated_point)]]) #Right bumper (moving)
     
     
+
 
 # Run until the user asks to quit
 running = True
@@ -157,10 +181,14 @@ while running:
     pygame.draw.polygon(screen, (0,255,0), ((164, 243),(140, 264), (190, 310), (241, 264), (217, 243))) #diamond bumper
     pygame.draw.polygon(screen, (0,255,0), (rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345)), rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345)),  rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345)),  rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345)),  rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345)),  rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345)),  rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345)))) #l bumper
     
-    print(shapes[-1])
+    pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
+    prev_coords = pos
+    ball_update()
+    
+    print(pos)
 
     
-    #pygame.draw.circle(screen, (0, 0, 255), (250, 250), 75)
+    #
     
     # Flip the display
     pygame.display.flip()
