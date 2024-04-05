@@ -78,7 +78,7 @@ def rotated_points(point, angle, r_point):
     return (rotated_x, rotated_y)
     
 def Rect_coords(top, left, width, height):
-    return  [[top,left],[top+height,left],[top+height,left+width],[top,left+width]] #rect coords switched
+    return  [[top,left],[top+width,left],[top+width,left+height],[top,left+height]] #rect coords switched
     
 from pygame.locals import (
     K_LEFT,
