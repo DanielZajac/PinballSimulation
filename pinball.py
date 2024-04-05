@@ -7,6 +7,7 @@ import numpy as np
 
 def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes):
     #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
+    #new comment
 
     for shape in shapes:
         print(shape)
