@@ -50,6 +50,10 @@ r_rotated_point = (549, 907)
 R_angle_start = -45
 R_angle = R_angle_start
 
+#Spring properties
+d = 0
+max_d = 80
+
 #Import sound mixer
 pygame.mixer.init()
 
@@ -166,8 +170,8 @@ def init():
     shapes.append([[340 + sq_x_offset, 180 + sq_y_offset], [340 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 180 + sq_y_offset]]) #square bumper
     shapes.append([[115,726],[115, 519],[210,726]]) #Left Tri Bumper
     shapes.append([[560,726],[665, 520],[665,726]]) #Right Tri Bumper
-    shapes.append([[742, 840],[782, 840],[782, 865], [742, 865]]) #Spring
     
+    shapes.append([[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]) #Spring
     
     shapes.append([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left Flipper (moving)
     shapes.append([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
@@ -182,22 +186,27 @@ while running:
     if keys[K_LEFT]:
         if L_angle > L_angle_start - 45:
             L_angle -= 3
-        elif L_angle == L_angle_start:
-            L_angle = L_angle_start
     
     if L_angle <= L_angle_start and not keys[K_LEFT]: #falls back to resting position
         L_angle += 2
-        
+    
+    # Right Flipper Movement    
     if keys[K_RIGHT]:
         if R_angle < R_angle_start + 45:
             R_angle += 3
-        elif R_angle == R_angle_start:
-            R_angle = R_angle_start
     
     if R_angle >= R_angle_start and not keys[K_RIGHT]: #falls back to resting position
         R_angle -= 2
     
+    # Spring Movement and d tracker
+    if keys[K_r]:
+        if d != max_d:
+            d += 2
     
+    if d >= 0 and not keys[K_r]:
+        d -= 10
+    print(f"D = {d}")
+
 
     # Did the user click the window close button?
     for event in pygame.event.get():
@@ -254,7 +263,8 @@ while running:
     shapes[-1] = ([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
 
     #Spring
-    pygame.draw.polygon(screen, (255,0,0), ((742, 840),(782, 840),(782, 865), (742, 865))) #Spring box
+    pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
+    shapes[-1] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
     ball_update()
