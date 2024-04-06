@@ -65,7 +65,7 @@ sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Ball properties
 
-vel = [0,200]
+vel = [0,100]
 start_pos = [763, 750]
 pos = copy.deepcopy(start_pos)
 g = 0.0005 # gamma (Drag Coeff)
@@ -284,6 +284,7 @@ while running:
     pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
     shapes[10] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
     #print(f"D = {pos}")
+    #print(f"D = {shapes[10]}")
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
     ball_update()

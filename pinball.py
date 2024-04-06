@@ -33,7 +33,7 @@ def line_intersection(point1, point2, shape1, shape2):
 error = 0.005
 def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes):
     #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
-
+    print(shapes[10])
     for shape in shapes:
         shape.append(shape[0])
 
