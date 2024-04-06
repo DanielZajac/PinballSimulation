@@ -20,6 +20,7 @@ PINB_BOTTOM = 0
 
 shapes = [] #List with all shape coords
 total_Frames = 0
+lives = 3
 
 #Background Frames
 pygame.init()
@@ -50,6 +51,10 @@ r_rotated_point = (549, 907)
 R_angle_start = -45
 R_angle = R_angle_start
 
+#Spring properties
+d = 0
+max_d = 80
+
 #Import sound mixer
 pygame.mixer.init()
 
@@ -59,10 +64,12 @@ sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
 sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Ball properties
-vel = [-150,-20]
-pos = [300, 101]
 
-g = 0.05 # gamma (Drag Coeff)
+vel = [0,200]
+start_pos = [763, 750]
+pos = copy.deepcopy(start_pos)
+g = 0.0005 # gamma (Drag Coeff)
+
 m = 1
 radius = 10
 
@@ -143,6 +150,7 @@ from pygame.locals import (
     KEYDOWN,
     K_ESCAPE,
     K_r,
+    K_s,
 )
 
 def init():
@@ -161,13 +169,13 @@ def init():
     shapes.append([[35, 950],[35, 770],[255, 950]]) #bottom left triangle
     shapes.append([[730, 949],[730, 770],[510, 949]]) #bottom right triangle
     
+    shapes.append([[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]) #Spring
+    
     shapes.append([[164, 243],[140, 264], [190, 310], [241, 264], [217, 243]]) #diamond bumper
     shapes.append([list(rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345))),list(rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345))), list(rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345))), list(rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345))),  list(rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345))),  list(rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345))), list(rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345)))]) #L bumper
     shapes.append([[340 + sq_x_offset, 180 + sq_y_offset], [340 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 180 + sq_y_offset]]) #square bumper
     shapes.append([[115,726],[115, 519],[210,726]]) #Left Tri Bumper
     shapes.append([[560,726],[665, 520],[665,726]]) #Right Tri Bumper
-    shapes.append([[742, 840],[782, 840],[782, 865], [742, 865]]) #Spring
-    
     
     shapes.append([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left Flipper (moving)
     shapes.append([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
@@ -182,28 +190,47 @@ while running:
     if keys[K_LEFT]:
         if L_angle > L_angle_start - 45:
             L_angle -= 3
-        elif L_angle == L_angle_start:
-            L_angle = L_angle_start
     
     if L_angle <= L_angle_start and not keys[K_LEFT]: #falls back to resting position
         L_angle += 2
-        
+    
+    # Right Flipper Movement    
     if keys[K_RIGHT]:
         if R_angle < R_angle_start + 45:
             R_angle += 3
-        elif R_angle == R_angle_start:
-            R_angle = R_angle_start
     
     if R_angle >= R_angle_start and not keys[K_RIGHT]: #falls back to resting position
         R_angle -= 2
     
+    # Spring Movement and d tracker
+    if keys[K_s]:
+        if d != max_d:
+            d += 2
     
+    if d > 0 and not keys[K_s]:
+        d -= 4
+    elif d < 0 and not keys[K_s]:
+        d = 0
+
+    if pos[1] >= 960: #if ball went down the hole run over
+                pos = copy.deepcopy(start_pos)
+                vel = [0,0]
+                lives -= 1
+                if lives == 0:
+                    running = False
+
 
     # Did the user click the window close button?
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
+            if event.key == K_r: #if run reset
+                pos = copy.deepcopy(start_pos)
+                vel = [0,0]
+                lives -= 1
+                if lives == 0:
+                    running = False
         if event.type == pygame.QUIT:
             running = False
 
@@ -254,7 +281,9 @@ while running:
     shapes[-1] = ([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
 
     #Spring
-    pygame.draw.polygon(screen, (255,0,0), ((742, 840),(782, 840),(782, 865), (742, 865))) #Spring box
+    pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
+    shapes[10] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
+    print(f"D = {pos}")
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
     ball_update()
