@@ -2,7 +2,7 @@
 
 # Import and initialize the pygame library
 import pygame
-import pinball
+import collision_detection_response
 import numpy as np
 import math
 import copy
@@ -55,7 +55,7 @@ sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
 sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Debugging Flag - if true all collision shapes appear
-is_Debug = True
+is_Debug = False
 
 #Left Flipper properties
 L_rotated_point = (201, 910)
@@ -72,8 +72,8 @@ d = 0
 max_d = 80
 
 #Ball properties
-vel = [0, 400]
-start_pos = [763, 750]
+vel = [0, 0]
+start_pos = [763, 760]
 pos = copy.deepcopy(start_pos)
 m = 10
 radius = 15
@@ -114,7 +114,7 @@ def ball_update():
     pos[0] += (dt * vel[0])
     pos[1] += (dt * vel[1])
 
-    isCollision, new_velocity, time_to_collision, barrier_type, object_number = pinball.better_collision(prev_pos, pos, vel, radius, shapes, left_flipper_moving, right_flipper_moving, spring_moving)
+    isCollision, new_velocity, time_to_collision, barrier_type, object_number = collision_detection_response.better_collision(prev_pos, pos, vel, radius, shapes, left_flipper_moving, right_flipper_moving, spring_moving)
 
     #if we are allowed to have a collision right now
     if isCollision and collision_buffer == 0:

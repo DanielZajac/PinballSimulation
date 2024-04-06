@@ -50,7 +50,7 @@ def end_of_path_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radi
 
             if np.dot(perpindicular_collision_line1, ball_velocity) < 0:
                 response_direction = perpindicular_collision_line1
-
+                
                 #will use this value to find the collision point and then collision time
                 ball_collision_direction_from_radius = perpindicular_collision_line2
             else:
