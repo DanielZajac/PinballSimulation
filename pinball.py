@@ -33,7 +33,7 @@ def line_intersection(point1, point2, shape1, shape2):
 error = 0.005
 def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes):
     #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
-    print(shapes[10])
+    
     for shape in shapes:
         shape.append(shape[0])
 
@@ -185,7 +185,7 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
                     y_intersect >= min(shape[i][1], shape[i+1][1])-error and y_intersect <= max(shape[i][1], shape[i+1][1])+error):
                     potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope, count])
                     #adding the two vertices line to the list of potential first contacts, and their intersect
-                count += 1
+            count += 1
                 
 
     if len(potential_lines) != 0:
