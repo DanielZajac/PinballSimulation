@@ -104,7 +104,7 @@ def ball_update():
     pos[0] += (dt * vel[0])
     pos[1] += (dt * vel[1])
 
-    isCollision, new_velocity, time_to_collision, barrier_type = pinball.better_collision(prev_pos, pos, vel, radius, shapes)
+    isCollision, new_velocity, time_to_collision, barrier_type, object_number = pinball.better_collision(prev_pos, pos, vel, radius, shapes)
     
     #if we are allowed to have a collision right now
     if isCollision and collision_buffer == 0:
@@ -283,7 +283,7 @@ while running:
     #Spring
     pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
     shapes[10] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
-    print(f"D = {pos}")
+    #print(f"D = {pos}")
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
     ball_update()

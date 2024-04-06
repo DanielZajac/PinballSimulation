@@ -59,12 +59,107 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
     right_pos_increment = ball_radius * right_direction
     right_pos_start = ball_pos_start + right_pos_increment
     right_pos_end = ball_pos_end + right_pos_increment
-
     #now we want to check if any shape lines intersect these 'boundary lines' of our ball's travel path
+
+    #first (and main) part of the collision detection system
+    #now if there was no collision on the path, we will check for collisions near the end of the ball's travel
+    potential_lines = []
+    count = 0
+    for shape in shapes:
+        for i in range(len(shape)-1):
+
+            shape_line_vector = [shape[i+1][0] - shape[i][0], shape[i+1][1] - shape[i][1]]
+
+            #finding unit vector of shape line
+            shape_line_vector_length = np.sqrt((shape_line_vector[0])**2 + (shape_line_vector[1])**2)
+            shape_line_vector_unit = [shape_line_vector[0]/shape_line_vector_length, shape_line_vector[1]/shape_line_vector_length]
+
+            #finding the two perpindicular vectors to our shape_line_vector
+            perpindicular_collision_line1 = [-shape_line_vector_unit[1], shape_line_vector_unit[0]]
+            perpindicular_collision_line2 = [shape_line_vector_unit[1], -shape_line_vector_unit[0]]
+
+            if np.dot(perpindicular_collision_line1, ball_velocity) < 0:
+                response_direction = perpindicular_collision_line1
+
+                #will use this value to find the collision point and then collision time
+                ball_collision_direction_from_radius = perpindicular_collision_line2
+            else:
+                response_direction = perpindicular_collision_line2
+                ball_collision_direction_from_radius = perpindicular_collision_line1
+
+            #finding the point on the ball which makes contact with the platform
+            ball_collision_direction_from_radius = np.array(ball_collision_direction_from_radius)
+            ball_collision_point_start = ball_pos_start + ball_radius*(ball_collision_direction_from_radius)
+            ball_collision_point_end = ball_pos_end + ball_radius*(ball_collision_direction_from_radius)
+
+            #this point will be the closest point on the shape line to the ball
+            x_intersect, y_intersect = line_intersection(ball_pos_end, ball_collision_point_end, shape[i], shape[i+1])
+
+            #now we want to check if that closest point on the line is within 'radius' units of the center of the ball at the end of its path
+            distance_to_line = np.sqrt((x_intersect - ball_pos_end[0])**2 + (y_intersect - ball_pos_end[1])**2)
+
+            #find actual point where they collide
+            x_intersect, y_intersect = line_intersection(ball_collision_point_start, [ball_collision_point_start[0] + ball_velocity[0], ball_collision_point_start[1] + ball_velocity[1]], shape[i], shape[i+1])
+
+            #if it is within radius, we have a collision and add it to potential lines
+            if distance_to_line <= ball_radius + error:
+                if (x_intersect >= min(ball_collision_point_end[0], ball_pos_end[0])-error and x_intersect <= max(ball_collision_point_end[0], ball_pos_end[0])+error and
+                    y_intersect >= min(ball_collision_point_end[1], ball_pos_end[1])-error and y_intersect <= max(ball_collision_point_end[1], ball_pos_end[1])+error and
+                    x_intersect >= min(shape[i][0], shape[i+1][0])-error and x_intersect <= max(shape[i][0], shape[i+1][0])+error and
+                    y_intersect >= min(shape[i][1], shape[i+1][1])-error and y_intersect <= max(shape[i][1], shape[i+1][1])+error):
+                    potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, distance_to_line, count, [response_direction[0], response_direction[1]], [ball_collision_point_start[0], ball_collision_point_start[1]]])
+        count += 1
+
+    if len(potential_lines) != 0:
+        min_distance_to_intersection = 10000000
+
+        #now want to find the closest line if multiple intersect
+        for line in potential_lines:
+            if line[4] < min_distance_to_intersection:
+                closest_line = line
+                min_distance_to_intersection = line[4]
+
+        #barrier types: 1 = wall, 2 = flipper, 3 = bumper
+        barrier_type = 0
+        if closest_line[5] < 10:
+            barrier_type = 1
+        elif closest_line[5] >= num_shapes-2:
+            barrier_type = 2
+        else:
+            barrier_type = 3
+        
+        #calculting velocity after force is applied in direction of platform's normal vector
+        force_strength = 15
+
+        #if the contact was with our flippers, we increase the force applied (the flippers in our game have a greater applied force when something hits them)
+        if barrier_type == 2:
+            force_strength = 30
+        elif barrier_type == 1:
+            force_strength = 0
+
+        response_direction = np.array(closest_line[6])
+        ball_velocity = np.array(ball_velocity)
+
+        #calculate the component of velocity parallel to the normal
+        parallel_component = np.dot(ball_velocity, response_direction) * response_direction
+        #calculate the component of velocity perpendicular to the normal
+        perpendicular_component = ball_velocity - parallel_component
+
+        #disregard the parallel component, replace it with a force in parallel direction and add it to the perpendicular component
+        new_velocity = [(response_direction[0]*force_strength)+(-parallel_component[0])+perpendicular_component[0], (response_direction[1]*force_strength)+(-parallel_component[1])+perpendicular_component[1]]
+
+        #finding distance to travel from ball contacat point start to intersection point (all in direction of velocity)
+        distance_to_travel = np.sqrt((closest_line[7][0] - closest_line[2])**2 + (closest_line[7][1] - closest_line[3])**2)
+        velocity_magnitude = np.sqrt((ball_velocity[0])**2 + (ball_velocity[1])**2)
+
+        #distance/velocity to find time until collision
+        collision_dt = distance_to_travel/velocity_magnitude
+
+        print("Good collision")
+        return True, new_velocity, collision_dt, barrier_type, closest_line[5]
 
     #this will store the lines which intersect at least one of the ball's boundary lines on its travel path
     potential_lines = []
-
     for i in range(2):
         if (i == 0):
             point1 = left_pos_start
@@ -171,103 +266,7 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         #distance/velocity to find time until collision
         collision_dt = distance_to_travel/velocity_magnitude
 
-        return True, new_velocity, collision_dt, barrier_type
-
-    #second (and main) part of the collision detection system
-    #now if there was no collision on the path, we will check for collisions near the end of the ball's travel
-    potential_lines = []
-    count = 0
-    for shape in shapes:
-        for i in range(len(shape)-1):
-
-            shape_line_vector = [shape[i+1][0] - shape[i][0], shape[i+1][1] - shape[i][1]]
-
-            #finding unit vector of shape line
-            shape_line_vector_length = np.sqrt((shape_line_vector[0])**2 + (shape_line_vector[1])**2)
-            shape_line_vector_unit = [shape_line_vector[0]/shape_line_vector_length, shape_line_vector[1]/shape_line_vector_length]
-
-            #finding the two perpindicular vectors to our shape_line_vector
-            perpindicular_collision_line1 = [-shape_line_vector_unit[1], shape_line_vector_unit[0]]
-            perpindicular_collision_line2 = [shape_line_vector_unit[1], -shape_line_vector_unit[0]]
-
-            if np.dot(perpindicular_collision_line1, ball_velocity) < 0:
-                response_direction = perpindicular_collision_line1
-
-                #will use this value to find the collision point and then collision time
-                ball_collision_direction_from_radius = perpindicular_collision_line2
-            else:
-                response_direction = perpindicular_collision_line2
-                ball_collision_direction_from_radius = perpindicular_collision_line1
-
-            #finding the point on the ball which makes contact with the platform
-            ball_collision_direction_from_radius = np.array(ball_collision_direction_from_radius)
-            ball_collision_point_start = ball_pos_start + ball_radius*(ball_collision_direction_from_radius)
-            ball_collision_point_end = ball_pos_end + ball_radius*(ball_collision_direction_from_radius)
-
-            #this point will be the closest point on the shape line to the ball
-            x_intersect, y_intersect = line_intersection(ball_pos_end, ball_collision_point_end, shape[i], shape[i+1])
-
-            #now we want to check if that closest point on the line is within 'radius' units of the center of the ball at the end of its path
-            distance_to_line = np.sqrt((x_intersect - ball_pos_end[0])**2 + (y_intersect - ball_pos_end[1])**2)
-
-            #find actual point where they collide
-            x_intersect, y_intersect = line_intersection(ball_collision_point_start, [ball_collision_point_start[0] + ball_velocity[0], ball_collision_point_start[1] + ball_velocity[1]], shape[i], shape[i+1])
-
-            #if it is within radius, we have a collision and add it to potential lines
-            if distance_to_line <= ball_radius + error:
-                if (x_intersect >= min(ball_collision_point_end[0], ball_pos_end[0])-error and x_intersect <= max(ball_collision_point_end[0], ball_pos_end[0])+error and
-                    y_intersect >= min(ball_collision_point_end[1], ball_pos_end[1])-error and y_intersect <= max(ball_collision_point_end[1], ball_pos_end[1])+error and
-                    x_intersect >= min(shape[i][0], shape[i+1][0])-error and x_intersect <= max(shape[i][0], shape[i+1][0])+error and
-                    y_intersect >= min(shape[i][1], shape[i+1][1])-error and y_intersect <= max(shape[i][1], shape[i+1][1])+error):
-                    potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, distance_to_line, count, [response_direction[0], response_direction[1]], [ball_collision_point_start[0], ball_collision_point_start[1]]])
-        count += 1
-
-    if len(potential_lines) != 0:
-        min_distance_to_intersection = 10000000
-
-        #now want to find the closest line if multiple intersect
-        for line in potential_lines:
-            if line[4] < min_distance_to_intersection:
-                closest_line = line
-                min_distance_to_intersection = line[4]
-
-        #barrier types: 1 = wall, 2 = flipper, 3 = bumper
-        barrier_type = 0
-        if closest_line[5] < 10:
-            barrier_type = 1
-        elif closest_line[5] >= num_shapes-2:
-            barrier_type = 2
-        else:
-            barrier_type = 3
-        
-        #calculting velocity after force is applied in direction of platform's normal vector
-        force_strength = 15
-
-        #if the contact was with our flippers, we increase the force applied (the flippers in our game have a greater applied force when something hits them)
-        if barrier_type == 2:
-            force_strength = 30
-        elif barrier_type == 1:
-            force_strength = 0
-
-        response_direction = np.array(closest_line[6])
-        ball_velocity = np.array(ball_velocity)
-
-        #calculate the component of velocity parallel to the normal
-        parallel_component = np.dot(ball_velocity, response_direction) * response_direction
-        #calculate the component of velocity perpendicular to the normal
-        perpendicular_component = ball_velocity - parallel_component
-
-        #disregard the parallel component, replace it with a force in parallel direction and add it to the perpendicular component
-        new_velocity = [(response_direction[0]*force_strength)+(-parallel_component[0])+perpendicular_component[0], (response_direction[1]*force_strength)+(-parallel_component[1])+perpendicular_component[1]]
-
-        #finding distance to travel from ball contacat point start to intersection point (all in direction of velocity)
-        distance_to_travel = np.sqrt((closest_line[7][0] - closest_line[2])**2 + (closest_line[7][1] - closest_line[3])**2)
-        velocity_magnitude = np.sqrt((ball_velocity[0])**2 + (ball_velocity[1])**2)
-
-        #distance/velocity to find time until collision
-        collision_dt = distance_to_travel/velocity_magnitude
-
-        return True, new_velocity, collision_dt, barrier_type
+        return True, new_velocity, collision_dt, barrier_type, closest_line[5]
 
     #now if no collisions ever happened, return default values which won't trigger updates in the ball update function
-    return False, [0, 0], 0, 0
+    return False, [0, 0], 0, 0, 0
