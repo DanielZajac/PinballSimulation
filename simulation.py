@@ -73,7 +73,7 @@ d = 0
 max_d = 80
 
 #Ball properties
-vel = [-40,-40]
+vel = [-150,80]
 start_pos = [270, 249]
 pos = copy.deepcopy(start_pos)
 m = 10
@@ -325,5 +325,8 @@ while running:
     # Flip the display
     pygame.display.flip()
     total_Frames += 1
+
+    #uncomment to debug frame by frame
+    #time.sleep(5)
 
 pygame.quit()
