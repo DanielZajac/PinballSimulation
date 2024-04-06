@@ -5,11 +5,38 @@ author 2: Heisn Nithysingha - 100817036
 
 import numpy as np
 
+def line_intersection(point1, point2, shape1, shape2):
+
+    #find slope of our travel path line
+    point_line_slope = (point2[1]-point1[1])/(point2[0]-point1[0]) if point2[0] - point1[0] != 0 else float('inf')
+    #find slope of shape line
+    shape_line_slope = (shape1[1]-shape2[1])/(shape1[0]-shape2[0]) if shape1[0] - shape2[0] != 0 else float('inf')
+
+    if point_line_slope == float('inf'): #point line (travel path) is vertical
+        x_intersect = point1[0]
+        y_intersect = shape_line_slope * (x_intersect - shape1[0]) + shape1[1]
+    elif shape_line_slope == float('inf'): #line between shape vertices is vertical
+        x_intersect = shape1[0]
+        y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
+    else:
+        if (point_line_slope - shape_line_slope) == 0:
+            x_intersect = float('inf')
+            y_intersect = float('inf')
+        else:
+            x_intersect = (point_line_slope * point1[0] - shape_line_slope * shape1[0] + shape1[1] - point1[1]) / (point_line_slope - shape_line_slope)
+            y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
+
+    return x_intersect, y_intersect
+
+
 def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes):
     #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
 
     for shape in shapes:
         shape.append(shape[0])
+
+    #used later
+    num_shapes = len(shapes)
 
     #need to find out the 'left' and 'right' sides of the ball, if we consider the 'top' the point mostforward in the direction the ball is going
     #to do this, find the line perpindicular to the balls direction, and go 'radius' units in the positive and negative direction
@@ -43,36 +70,24 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         else:
             point1 = right_pos_start
             point2 = right_pos_end
-        
-        #find slope of our travel path line
-        point_line_slope = (point2[1]-point1[1])/(point2[0]-point1[0]) if point2[0] - point1[0] != 0 else float('inf')
 
         #now we iterate through all shapes in our pinball machine
+        count = 0
         for shape in shapes:
+            count += 1
             #for each shape we will check each line (each adjacent pair of vertices), note that the last index is the first again (so that we don't miss the final line)
             for i in range(len(shape)-1):
 
                 shape_line_slope = (shape[i][1]-shape[i+1][1])/(shape[i][0]-shape[i+1][0]) if shape[i][0] - shape[i+1][0] != 0 else float('inf')
-                if point_line_slope == float('inf'): #point line (travel path) is vertical
-                    x_intersect = point1[0]
-                    y_intersect = shape_line_slope * (x_intersect - shape[i][0]) + shape[i][1]
-                elif shape_line_slope == float('inf'): #line between shape vertices is vertical
-                    x_intersect = shape[i][0]
-                    y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
-                else:
-                    if (point_line_slope - shape_line_slope) == 0:
-                        x_intersect = float('inf')
-                        y_intersect = float('inf')
-                    else:
-                        x_intersect = (point_line_slope * point1[0] - shape_line_slope * shape[i][0] + shape[i][1] - point1[1]) / (point_line_slope - shape_line_slope)
-                        y_intersect = point_line_slope * (x_intersect - point1[0]) + point1[1]
+                #finding the intersection of the boundary line and shape line
+                x_intersect, y_intersect = line_intersection(point1, point2, shape[i], shape[i+1])
                 
                 #checking if the intersection point is within the actual line, not far off in the distance
                 if (x_intersect >= min(point1[0], point2[0]) and x_intersect <= max(point1[0], point2[0]) and
                     y_intersect >= min(point1[1], point2[1]) and y_intersect <= max(point1[1], point2[1]) and
                     x_intersect >= min(shape[i][0], shape[i+1][0]) and x_intersect <= max(shape[i][0], shape[i+1][0]) and
                     y_intersect >= min(shape[i][1], shape[i+1][1]) and y_intersect <= max(shape[i][1], shape[i+1][1])):
-                    potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope])
+                    potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope, count])
                     #adding the two vertices line to the list of potential first contacts, and their intersect
 
     if len(potential_lines) != 0:
@@ -104,8 +119,12 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         #we want to find that line because the ball cannot have a collision with a wall which is facing the same direction as velocity (shown in report)
         if np.dot(perpindicular_collision_line1, ball_velocity) < 0:
             response_direction = perpindicular_collision_line1
+
+            #will use this value to find the collision point and then collision time
+            ball_collision_direction_from_radius = perpindicular_collision_line2
         else:
             response_direction = perpindicular_collision_line2
+            ball_collision_direction_from_radius = perpindicular_collision_line1
         
         response_direction = np.array(response_direction)
         ball_velocity = np.array(ball_velocity)
@@ -116,18 +135,32 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         perpendicular_component = ball_velocity - parallel_component
         
         #calculting velocity after force is applied in direction of platform's normal vector
-        force_strength = 10
+        force_strength = 15
+
+        #if the contact was with our flippers, we increase the force applied (the flippers in our game have a greater applied force when something hits them)
+        if closest_line[5] >= num_shapes-2:
+            force_strength = 30
         #disregard the parallel component, replace it with a force in parallel direction and add it to the perpendicular component
         new_velocity = [(response_direction[0]*force_strength)+(-parallel_component[0])+perpendicular_component[0], (response_direction[1]*force_strength)+(-parallel_component[1])+perpendicular_component[1]]
 
+        ball_collision_point_start = ball_pos_start + ball_radius*(ball_collision_direction_from_radius)
 
+        #find where we make contact with the shape
+        contact_point_x, contact_point_y = line_intersection(ball_collision_point_start, [ball_collision_point_start[0] + ball_velocity[0], ball_collision_point_start[1] + ball_velocity[1]], closest_line[0], closest_line[1])
 
-        collision_dt = "temp"
+        #finding distance to travel from start to contact point (all in direction of velocity)
+        distance_to_travel = np.sqrt((ball_collision_point_start[0] - contact_point_x)**2 + (ball_collision_point_start[1] - contact_point_y)**2)
+        velocity_magnitude = np.sqrt((ball_velocity[0])**2 + (ball_velocity[1])**2)
+
+        #distance/velocity to find time until collision
+        collision_dt = distance_to_travel/velocity_magnitude
 
         return True, new_velocity, collision_dt
-    else:
-        #now if there was no collision in the path, check for collisions near the end of the ball's travel
-        a = 1
 
+
+    #now if there was no collision on the path, we will check for collisions near the end of the ball's travel
+    
+
+    #return True, new_velocity, collision_dt
 
     return False, [0, 0], 0

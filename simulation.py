@@ -6,6 +6,7 @@ import pinball
 import numpy as np
 import math
 import copy
+import os
 
 # Define constants for the screen width and height
 SCREEN_WIDTH = 800
@@ -33,8 +34,14 @@ r_rotated_point = (549, 907)
 R_angle_start = -45
 R_angle = R_angle_start
 
+#Import sound mixer
+pygame.mixer.init()
+
+sound_file = "samplesound.wav"  # Change this to the path of your sound file
+sound = pygame.mixer.Sound(sound_file)
+
 #Ball properties
-vel = [60,-5]
+vel = [0,20]
 pos = [300,320]
 g = 0.05 # gamma (Drag Coeff)
 m = 1
@@ -44,27 +51,43 @@ radius = 10
 dt = 0.05
 G = 9.8
 
-#don't want collisions to happen too close together for now (temporary)
+#sometimes we want to prevent collisions temporarily, like if the ball jumps really far in one step and clips into a platform, we need to get out
+#so while we are getting out we do not detect collisions from within the block
 collision_buffer = 0
+
 def ball_update():
     global collision_buffer
+    global sound
 
+    #every frame decrease the buffer length remaining if the buffer is active
     if collision_buffer > 0:
         collision_buffer -= 1
 
+    #so that the old position remains to be used in collision calculations
     prev_pos = copy.deepcopy(pos)
     
-    #position update
+    #position update just to send where it would go to the collision function
     pos[0] += (dt * vel[0])
     pos[1] += (dt * vel[1])
 
     isCollision, new_velocity, time_to_collision = pinball.better_collision(prev_pos, pos, vel, radius, shapes)
     
+    #if we are allowed to have a collision right now
     if isCollision and collision_buffer == 0:
+        #playing sound on collision
+        if sound:
+            sound.play()
+
         collision_buffer = 10
-        #if there was a collision, use the updated collision returned by the function
+
+        #we move in the old velocity direction until the collision would happen
+        pos[0] = prev_pos[0] + (time_to_collision * vel[0])
+        pos[1] = prev_pos[1] + (time_to_collision * vel[1])
+
+        #now set up the new velocity for next time
         vel[0] = new_velocity[0]
         vel[1] = new_velocity[1]
+
     else:
         #default velocity update
         vel[0] += (dt * (-(g/m) * vel[0]))
