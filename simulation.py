@@ -43,6 +43,7 @@ imp = [] #List of all background frames
 imp.append(pygame.image.load("Pinball_Background\Pinball_1.png").convert())
 imp.append(pygame.image.load("Pinball_Background\Pinball_2.png").convert())
 imp.append(pygame.image.load("Pinball_Background\Pinball_3.png").convert())
+test_imp = pygame.image.load("Pinball_Background\PinBall_Test.png").convert()
  
 i = 0 #index for which background frame used
 
@@ -58,12 +59,12 @@ sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 is_Debug = False
 
 #Left Flipper properties
-l_rotated_point = (201, 910)
+L_rotated_point = (201, 910)
 L_angle_start = 45
 L_angle = L_angle_start
 
 #Right Flipper properties
-r_rotated_point = (549, 907)
+R_rotated_point = (549, 907)
 R_angle_start = -45
 R_angle = R_angle_start
 
@@ -89,7 +90,7 @@ sq_y_offset = 0
  
 #World properties
 dt = 0.05
-G = 60
+G = 65
 
 #sometimes we want to prevent collisions temporarily, like if the ball jumps really far in one step and clips into a platform, we need to get out
 #so while we are getting out we do not detect collisions from within the block
@@ -197,8 +198,8 @@ def init():
     shapes.append([[115,726],[115, 519],[210,726]]) #Left Tri Bumper
     shapes.append([[560,726],[665, 520],[665,726]]) #Right Tri Bumper
     
-    shapes.append([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left Flipper (moving)
-    shapes.append([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
+    shapes.append([list(rotated_points((200, 930), L_angle, L_rotated_point)),list(rotated_points((200, 890), L_angle, L_rotated_point)),list(rotated_points((320, 910), L_angle, L_rotated_point))]) #left Flipper (moving)
+    shapes.append([list(rotated_points((550, 890), R_angle, R_rotated_point)),list(rotated_points((550, 930), R_angle, R_rotated_point)),list(rotated_points((435, 910), R_angle, R_rotated_point))]) #Right Flipper (moving)
 
 # Run until the user asks to quit
 running = True
@@ -271,9 +272,12 @@ while running:
     imp[2] = pygame.image.load("Pinball_Background\Pinball_3.png").convert()
     
 # Using blit to copy content from one surface to other
-    screen.blit(imp[i], (0, 0))
-    if i == 2: i = 0
-    elif total_Frames % 10 == 0: i += 1
+    if is_Debug:
+        screen.blit(test_imp, (-1, -3))
+        if i == 2: i = 0
+        elif total_Frames % 10 == 0: i += 1
+    else:
+        screen.blit(test_imp, (-1, -3))
     
     if is_Debug:
         #Boarder prints
@@ -298,12 +302,12 @@ while running:
 
     #Flipper prints
     #Left
-    pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930), L_angle, l_rotated_point), rotated_points((200, 890), L_angle, l_rotated_point), rotated_points((320, 910), L_angle, l_rotated_point))) #left Flipper
-    shapes[-2] = ([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left Flipper (moving)
+    pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930), L_angle, L_rotated_point), rotated_points((200, 890), L_angle, L_rotated_point), rotated_points((320, 910), L_angle, L_rotated_point))) #left Flipper
+    shapes[-2] = ([list(rotated_points((200, 930), L_angle, L_rotated_point)),list(rotated_points((200, 890), L_angle, L_rotated_point)),list(rotated_points((320, 910), L_angle, L_rotated_point))]) #left Flipper (moving)
     
     #Right
-    pygame.draw.polygon(screen, (0,0,0), (rotated_points((550, 890), R_angle, r_rotated_point), rotated_points((550, 930),  R_angle, r_rotated_point), rotated_points((435, 910), R_angle, r_rotated_point))) #Right Flipper
-    shapes[-1] = ([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
+    pygame.draw.polygon(screen, (0,0,0), (rotated_points((550, 890), R_angle, R_rotated_point), rotated_points((550, 930),  R_angle, R_rotated_point), rotated_points((435, 910), R_angle, R_rotated_point))) #Right Flipper
+    shapes[-1] = ([list(rotated_points((550, 890), R_angle, R_rotated_point)),list(rotated_points((550, 930), R_angle, R_rotated_point)),list(rotated_points((435, 910), R_angle, R_rotated_point))]) #Right Flipper (moving)
 
     #Spring
     pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
@@ -316,7 +320,7 @@ while running:
     ball_update()
     
     text_surface = Game_Text.render(f'Points = {points}', False, (0, 0, 0))
-    screen.blit(text_surface, (10,0))
+    screen.blit(text_surface, (300,0))
 
     # Flip the display
     pygame.display.flip()
