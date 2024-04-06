@@ -240,7 +240,7 @@ while running:
         spring_moving = False
         d = 0
 
-    if pos[1] >= 960: #if ball went down the hole run over
+    if pos[1] >= 1000: #if ball went down the hole run over
                 pos = copy.deepcopy(start_pos)
                 vel = [0,0]
                 lives -= 1
