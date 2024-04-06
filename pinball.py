@@ -73,8 +73,8 @@ def end_of_path_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radi
 
             #if it is within radius, we have a collision and add it to potential lines
             if distance_to_line <= ball_radius + error:
-                if (x_intersect >= min(ball_collision_point_end[0], ball_pos_end[0])-error and x_intersect <= max(ball_collision_point_end[0], ball_pos_end[0])+error and
-                    y_intersect >= min(ball_collision_point_end[1], ball_pos_end[1])-error and y_intersect <= max(ball_collision_point_end[1], ball_pos_end[1])+error and
+                if (x_intersect >= min(ball_collision_point_end[0], ball_collision_point_start[0])-error and x_intersect <= max(ball_collision_point_end[0], ball_collision_point_start[0])+error and
+                    y_intersect >= min(ball_collision_point_end[1], ball_collision_point_start[1])-error and y_intersect <= max(ball_collision_point_end[1], ball_collision_point_start[1])+error and
                     x_intersect >= min(shape[i][0], shape[i+1][0])-error and x_intersect <= max(shape[i][0], shape[i+1][0])+error and
                     y_intersect >= min(shape[i][1], shape[i+1][1])-error and y_intersect <= max(shape[i][1], shape[i+1][1])+error):
                     potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, distance_to_line, count, [response_direction[0], response_direction[1]], [ball_collision_point_start[0], ball_collision_point_start[1]]])
@@ -133,7 +133,6 @@ def end_of_path_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radi
         #distance/velocity to find time until collision
         collision_dt = distance_to_travel/velocity_magnitude
 
-        print("Good collision: object ", closest_line[5])
         return True, new_velocity, collision_dt, barrier_type, closest_line[5]
     return False, [0, 0], 0, 0, 0
 

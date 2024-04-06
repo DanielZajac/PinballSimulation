@@ -1,4 +1,4 @@
-# Simple pygame program
+#Daniel Zajac Heisn Nithysingha Pinball Program
 
 # Import and initialize the pygame library
 import pygame
@@ -6,7 +6,7 @@ import pinball
 import numpy as np
 import math
 import copy
-import os
+import time
 
 # Define constants for the screen width and height
 SCREEN_WIDTH = 800
@@ -71,18 +71,13 @@ R_angle = R_angle_start
 d = 0
 max_d = 80
 
-
-
 #Ball properties
-
-vel = [0,0]
-
+vel = [0, 400]
 start_pos = [763, 750]
 pos = copy.deepcopy(start_pos)
-g = 0.05 # gamma (Drag Coeff)
-
 m = 10
 radius = 15
+g = 0.05 # gamma (Drag Coeff)
 
 #L Bumper properties
 l_x_offset = 0
@@ -120,7 +115,6 @@ def ball_update():
     pos[1] += (dt * vel[1])
 
     isCollision, new_velocity, time_to_collision, barrier_type, object_number = pinball.better_collision(prev_pos, pos, vel, radius, shapes, left_flipper_moving, right_flipper_moving, spring_moving)
-    
 
     #if we are allowed to have a collision right now
     if isCollision and collision_buffer == 0:
@@ -137,7 +131,6 @@ def ball_update():
         #playing sound on collision
         if sound:
             sound[barrier_type].play()
-            print(points , object_number)
 
         collision_buffer = 2
 
@@ -253,7 +246,6 @@ while running:
                 if lives == 0:
                     running = False
 
-
     # Did the user click the window close button?
     for event in pygame.event.get():
         if event.type == KEYDOWN:
@@ -283,7 +275,6 @@ while running:
     if i == 2: i = 0
     elif total_Frames % 10 == 0: i += 1
     
-
     if is_Debug:
         #Boarder prints
         pygame.draw.rect(screen, (255,0,0), pygame.Rect(730, 250, WALL_WIDTH, 700)) #inner wall
@@ -330,6 +321,5 @@ while running:
     # Flip the display
     pygame.display.flip()
     total_Frames += 1
-
 
 pygame.quit()
