@@ -20,6 +20,7 @@ PINB_BOTTOM = 0
 
 shapes = [] #List with all shape coords
 total_Frames = 0
+lives = 3
 
 #Background Frames
 pygame.init()
@@ -63,10 +64,10 @@ sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
 sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Ball properties
-vel = [0,0]
-pos = [763, 750]
-
-g = 0.5 # gamma (Drag Coeff)
+vel = [0,200]
+start_pos = [763, 750]
+pos = copy.deepcopy(start_pos)
+g = 0.0005 # gamma (Drag Coeff)
 m = 1
 radius = 10
 
@@ -209,6 +210,12 @@ while running:
     elif d < 0 and not keys[K_s]:
         d = 0
 
+    if pos[1] >= 960: #if ball went down the hole run over
+                pos = copy.deepcopy(start_pos)
+                vel = [0,0]
+                lives -= 1
+                if lives == 0:
+                    running = False
 
 
     # Did the user click the window close button?
@@ -216,6 +223,12 @@ while running:
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
+            if event.key == K_r: #if run reset
+                pos = copy.deepcopy(start_pos)
+                vel = [0,0]
+                lives -= 1
+                if lives == 0:
+                    running = False
         if event.type == pygame.QUIT:
             running = False
 
@@ -268,7 +281,7 @@ while running:
     #Spring
     pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
     shapes[10] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
-    print(f"D = {shapes[10]}")
+    print(f"D = {pos}")
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
     ball_update()
