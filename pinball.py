@@ -30,6 +30,7 @@ def line_intersection(point1, point2, shape1, shape2):
 
 #so we can call this multiple times
 def end_of_path_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes, num_shapes, left_flipper_moving, right_flipper_moving, spring_moving):
+
     #first (and main) part of the collision detection system
     #now if there was no collision on the path, we will check for collisions near the end of the ball's travel
     potential_lines = []
@@ -200,7 +201,7 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
                     y_intersect >= min(shape[i][1], shape[i+1][1])-error and y_intersect <= max(shape[i][1], shape[i+1][1])+error):
                     potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope, count])
                     #adding the two vertices line to the list of potential first contacts, and their intersect
-                count += 1
+            count += 1
                 
 
     if len(potential_lines) != 0:

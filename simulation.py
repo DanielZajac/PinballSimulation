@@ -20,7 +20,10 @@ PINB_BOTTOM = 0
 
 shapes = [] #List with all shape coords
 total_Frames = 0
+
+#Game Properties
 lives = 3
+points = 0
 
 left_flipper_moving = False
 right_flipper_moving = False
@@ -31,6 +34,8 @@ pygame.init()
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+Game_Text = pygame.font.Font("DeterminationSansWebRegular-369X.ttf", 30)
+
 
 imp = [] #List of all background frames
 
@@ -41,6 +46,13 @@ imp.append(pygame.image.load("Pinball_Background\Pinball_3.png").convert())
  
 i = 0 #index for which background frame used
 
+#Import sound mixer
+pygame.mixer.init()
+
+sound = [-1] * 4 #will hold all sound to then use later
+sound[1] = pygame.mixer.Sound("Sounds\samplesound.wav")
+sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
+sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Debugging Flag - if true all collision shapes appear
 is_Debug = False
@@ -59,23 +71,18 @@ R_angle = R_angle_start
 d = 0
 max_d = 80
 
-#Import sound mixer
-pygame.mixer.init()
 
-sound = [-1] * 4 #will hold all sound to then use later
-sound[1] = pygame.mixer.Sound("Sounds\samplesound.wav")
-sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
-sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Ball properties
 
 vel = [0,0]
+
 start_pos = [763, 750]
 pos = copy.deepcopy(start_pos)
-g = 0.0005 # gamma (Drag Coeff)
+g = 0.05 # gamma (Drag Coeff)
 
-m = 1
-radius = 10
+m = 10
+radius = 15
 
 #L Bumper properties
 l_x_offset = 0
@@ -96,8 +103,10 @@ collision_buffer = 0
 def ball_update():
     global collision_buffer
     global sound
-    global flipper_moving
+    global left_flipper_moving
+    global right_flipper_moving
     global spring_moving
+    global points
 
     #every frame decrease the buffer length remaining if the buffer is active
     if collision_buffer > 0:
@@ -112,11 +121,23 @@ def ball_update():
 
     isCollision, new_velocity, time_to_collision, barrier_type, object_number = pinball.better_collision(prev_pos, pos, vel, radius, shapes, left_flipper_moving, right_flipper_moving, spring_moving)
     
+
     #if we are allowed to have a collision right now
     if isCollision and collision_buffer == 0:
+        
+        if object_number == 10:
+            points += 50
+        elif object_number == 11:
+            points += 10
+        elif object_number == 12:
+            points += 11
+        elif object_number == 13 or object_number == 14:
+            points += 5
+    
         #playing sound on collision
         if sound:
             sound[barrier_type].play()
+            print(points , object_number)
 
         collision_buffer = 2
 
@@ -295,14 +316,16 @@ while running:
 
     #Spring
     pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
+
     shapes[9] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
+
     #print(f"D = {pos}")
     
-    pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
+    pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius) #Ball Update
     ball_update()
     
-    #print(pos)
-    
+    text_surface = Game_Text.render(f'Points = {points}', False, (0, 0, 0))
+    screen.blit(text_surface, (10,0))
 
     # Flip the display
     pygame.display.flip()
