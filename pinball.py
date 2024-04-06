@@ -28,7 +28,9 @@ def line_intersection(point1, point2, shape1, shape2):
 
     return x_intersect, y_intersect
 
-
+#error here allows us us to account for rounding error
+#for example if a collision line is flat, when we find the y_intersection with other lines it will round the value slightly so we need error to check it
+error = 0.005
 def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes):
     #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
 
@@ -83,12 +85,13 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
                 x_intersect, y_intersect = line_intersection(point1, point2, shape[i], shape[i+1])
                 
                 #checking if the intersection point is within the actual line, not far off in the distance
-                if (x_intersect >= min(point1[0], point2[0]) and x_intersect <= max(point1[0], point2[0]) and
-                    y_intersect >= min(point1[1], point2[1]) and y_intersect <= max(point1[1], point2[1]) and
-                    x_intersect >= min(shape[i][0], shape[i+1][0]) and x_intersect <= max(shape[i][0], shape[i+1][0]) and
-                    y_intersect >= min(shape[i][1], shape[i+1][1]) and y_intersect <= max(shape[i][1], shape[i+1][1])):
+                if (x_intersect >= min(point1[0], point2[0])-error and x_intersect <= max(point1[0], point2[0])+error and
+                    y_intersect >= min(point1[1], point2[1])-error and y_intersect <= max(point1[1], point2[1])+error and
+                    x_intersect >= min(shape[i][0], shape[i+1][0])-error and x_intersect <= max(shape[i][0], shape[i+1][0])+error and
+                    y_intersect >= min(shape[i][1], shape[i+1][1])-error and y_intersect <= max(shape[i][1], shape[i+1][1])+error):
                     potential_lines.append([shape[i], shape[i+1], x_intersect, y_intersect, shape_line_slope, count])
                     #adding the two vertices line to the list of potential first contacts, and their intersect
+                
 
     if len(potential_lines) != 0:
         min_distance_to_intersection = 10000000000

@@ -57,8 +57,8 @@ sound_file = "Sounds\samplesound.wav"  # Change this to the path of your sound f
 sound = pygame.mixer.Sound(sound_file)
 
 #Ball properties
-vel = [0,0]
-pos = [762, 691]
+vel = [20,-700]
+pos = [300, 500]
 g = 0.005 # gamma (Drag Coeff)
 m = 1
 radius = 10
