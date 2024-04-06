@@ -71,29 +71,8 @@ def end_of_path_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radi
             #find actual point where they collide
             x_intersect, y_intersect = line_intersection(ball_collision_point_start, [ball_collision_point_start[0] + ball_velocity[0], ball_collision_point_start[1] + ball_velocity[1]], shape[i], shape[i+1])
 
-
-
-
-            #[190, 310], [241, 264], [217, 243]
-            if shape[i] == [241, 264] and shape[i+1] == [217, 243]:
-                print(distance_to_line, ball_radius)
-                print(distance_to_line <= ball_radius + error)
-                
-                print(x_intersect >= min(ball_collision_point_end[0], ball_collision_point_start[0])-error and x_intersect <= max(ball_collision_point_end[0], ball_collision_point_start[0])+error)
-                print(y_intersect >= min(ball_collision_point_end[1], ball_collision_point_start[1])-error and y_intersect <= max(ball_collision_point_end[1], ball_collision_point_start[1])+error)
-                
-                print("Intercepts: ", x_intersect, y_intersect)
-                
-                print(x_intersect >= min(shape[i][0], shape[i+1][0])-error and x_intersect <= max(shape[i][0], shape[i+1][0])+error)
-                print(y_intersect >= min(shape[i][1], shape[i+1][1])-error and y_intersect <= max(shape[i][1], shape[i+1][1])+error)
-
-
-
-
-
-
-
             #if it is within radius, we have a collision and add it to potential lines
+            #also not we deal with corner collisions by extending each platform by radius units so we don't clip into the block
             if distance_to_line <= ball_radius + error:
                 if (x_intersect >= min(ball_collision_point_end[0], ball_collision_point_start[0])-error and x_intersect <= max(ball_collision_point_end[0], ball_collision_point_start[0])+error and
                     y_intersect >= min(ball_collision_point_end[1], ball_collision_point_start[1])-error and y_intersect <= max(ball_collision_point_end[1], ball_collision_point_start[1])+error and
