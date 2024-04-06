@@ -53,11 +53,11 @@ R_angle = R_angle_start
 #Import sound mixer
 pygame.mixer.init()
 
-sound_file = "samplesound.wav"  # Change this to the path of your sound file
+sound_file = "Sounds\samplesound.wav"  # Change this to the path of your sound file
 sound = pygame.mixer.Sound(sound_file)
 
 #Ball properties
-vel = [0,-150]
+vel = [0,0]
 pos = [762, 691]
 g = 0.005 # gamma (Drag Coeff)
 m = 1
@@ -73,7 +73,7 @@ sq_y_offset = 0
  
 #World properties
 dt = 0.05
-G = 9.8
+G = 400
 
 #sometimes we want to prevent collisions temporarily, like if the ball jumps really far in one step and clips into a platform, we need to get out
 #so while we are getting out we do not detect collisions from within the block
@@ -162,6 +162,7 @@ def init():
     shapes.append([[340 + sq_x_offset, 180 + sq_y_offset], [340 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 180 + sq_y_offset]]) #square bumper
     shapes.append([[115,726],[115, 519],[210,726]]) #Left Tri Bumper
     shapes.append([[560,726],[665, 520],[665,726]]) #Right Tri Bumper
+    
     
     shapes.append([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left Flipper (moving)
     shapes.append([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
