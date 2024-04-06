@@ -40,10 +40,9 @@ Game_Text = pygame.font.Font("DeterminationSansWebRegular-369X.ttf", 30)
 imp = [] #List of all background frames
 
 # Set up Background frames
-imp.append(pygame.image.load("Pinball_Background\Pinball_1.png").convert())
-imp.append(pygame.image.load("Pinball_Background\Pinball_2.png").convert())
-imp.append(pygame.image.load("Pinball_Background\Pinball_3.png").convert())
-test_imp = pygame.image.load("Pinball_Background\PinBall_Test.png").convert()
+imp.append(pygame.image.load("Pinball_Background\PinBall_1.png").convert())
+imp.append(pygame.image.load("Pinball_Background\PinBall_2.png").convert())
+imp.append(pygame.image.load("Pinball_Background\PinBall_3.png").convert())
  
 i = 0 #index for which background frame used
 
@@ -56,7 +55,7 @@ sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
 sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Debugging Flag - if true all collision shapes appear
-is_Debug = False
+is_Debug = True
 
 #Left Flipper properties
 L_rotated_point = (201, 910)
@@ -73,8 +72,8 @@ d = 0
 max_d = 80
 
 #Ball properties
-vel = [-150,80]
-start_pos = [270, 249]
+vel = [0, 400]
+start_pos = [763, 750]
 pos = copy.deepcopy(start_pos)
 m = 10
 radius = 15
@@ -265,19 +264,13 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 print(f'Mouse clicked at ({x}, {y})')
-                
-    # Set up Background frames
-    imp[0] = pygame.image.load("Pinball_Background\Pinball_1.png").convert()
-    imp[1] = pygame.image.load("Pinball_Background\Pinball_2.png").convert()
-    imp[2] = pygame.image.load("Pinball_Background\Pinball_3.png").convert()
     
 # Using blit to copy content from one surface to other
-    if is_Debug:
-        screen.blit(test_imp, (-1, -3))
-        if i == 2: i = 0
-        elif total_Frames % 10 == 0: i += 1
-    else:
-        screen.blit(test_imp, (-1, -3))
+
+    screen.blit(imp[i], (-1, -3))
+    if i == 2: i = 0
+    elif total_Frames % 10 == 0: i += 1
+
     
     if is_Debug:
         #Boarder prints
