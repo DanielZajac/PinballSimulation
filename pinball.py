@@ -155,12 +155,24 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         #distance/velocity to find time until collision
         collision_dt = distance_to_travel/velocity_magnitude
 
-        return True, new_velocity, collision_dt
+        #
+        barrier_type = 0
+        if closest_line[5] < 9:
+            barrier_type = 1
+        elif closest_line[5] >= num_shapes-2:
+            barrier_type = 2
+        else:
+            barrier_type = 3
+
+        #barrier types: 1 = wall, 2 = flipper, 3 = bumper
+        return True, new_velocity, collision_dt, barrier_type
 
 
+    potential_lines = []
     #now if there was no collision on the path, we will check for collisions near the end of the ball's travel
-    
+    for i in range(len(shape)-1):
+        a = 1
 
     #return True, new_velocity, collision_dt
 
-    return False, [0, 0], 0
+    return False, [0, 0], 0, 0

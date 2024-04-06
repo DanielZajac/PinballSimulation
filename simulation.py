@@ -38,7 +38,7 @@ i = 0 #index for which background frame used
 
 
 #Debugging Flag - if true all collision shapes appear
-is_Debug = True
+is_Debug = False
 
 #Left Flipper properties
 l_rotated_point = (201, 910)
@@ -77,7 +77,7 @@ G = 400
 
 #sometimes we want to prevent collisions temporarily, like if the ball jumps really far in one step and clips into a platform, we need to get out
 #so while we are getting out we do not detect collisions from within the block
-collision_buffer = 2
+collision_buffer = 0
 
 def ball_update():
     global collision_buffer
@@ -94,7 +94,7 @@ def ball_update():
     pos[0] += (dt * vel[0])
     pos[1] += (dt * vel[1])
 
-    isCollision, new_velocity, time_to_collision = pinball.better_collision(prev_pos, pos, vel, radius, shapes)
+    isCollision, new_velocity, time_to_collision, barrier_type = pinball.better_collision(prev_pos, pos, vel, radius, shapes)
     
     #if we are allowed to have a collision right now
     if isCollision and collision_buffer == 0:
