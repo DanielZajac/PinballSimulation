@@ -53,12 +53,15 @@ R_angle = R_angle_start
 #Import sound mixer
 pygame.mixer.init()
 
-sound_file = "Sounds\samplesound.wav"  # Change this to the path of your sound file
-sound = pygame.mixer.Sound(sound_file)
+sound = [-1] * 4 #will hold all sound to then use later
+sound[1] = pygame.mixer.Sound("Sounds\samplesound.wav")
+sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
+sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Ball properties
-vel = [20,-700]
-pos = [300, 500]
+vel = [0,-150]
+pos = [762, 691]
+
 g = 0.005 # gamma (Drag Coeff)
 m = 1
 radius = 10
@@ -73,7 +76,7 @@ sq_y_offset = 0
  
 #World properties
 dt = 0.05
-G = 400
+G = 9.8
 
 #sometimes we want to prevent collisions temporarily, like if the ball jumps really far in one step and clips into a platform, we need to get out
 #so while we are getting out we do not detect collisions from within the block
@@ -100,7 +103,7 @@ def ball_update():
     if isCollision and collision_buffer == 0:
         #playing sound on collision
         if sound:
-            sound.play()
+            sound[barrier_type].play()
 
         collision_buffer = 2
 
@@ -139,6 +142,7 @@ from pygame.locals import (
     K_RIGHT,
     KEYDOWN,
     K_ESCAPE,
+    K_r,
 )
 
 def init():
@@ -162,6 +166,7 @@ def init():
     shapes.append([[340 + sq_x_offset, 180 + sq_y_offset], [340 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 180 + sq_y_offset]]) #square bumper
     shapes.append([[115,726],[115, 519],[210,726]]) #Left Tri Bumper
     shapes.append([[560,726],[665, 520],[665,726]]) #Right Tri Bumper
+    shapes.append([[742, 840],[782, 840],[782, 865], [742, 865]]) #Spring
     
     
     shapes.append([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left Flipper (moving)
@@ -248,6 +253,8 @@ while running:
     pygame.draw.polygon(screen, (0,0,0), (rotated_points((550, 890), R_angle, r_rotated_point), rotated_points((550, 930),  R_angle, r_rotated_point), rotated_points((435, 910), R_angle, r_rotated_point))) #Right Flipper
     shapes[-1] = ([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
 
+    #Spring
+    pygame.draw.polygon(screen, (255,0,0), ((742, 840),(782, 840),(782, 865), (742, 865))) #Spring box
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
     ball_update()
