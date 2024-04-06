@@ -73,8 +73,8 @@ d = 0
 max_d = 80
 
 #Ball properties
-vel = [0, 400]
-start_pos = [763, 750]
+vel = [-40,-40]
+start_pos = [270, 249]
 pos = copy.deepcopy(start_pos)
 m = 10
 radius = 15
@@ -133,7 +133,7 @@ def ball_update():
         if sound:
             sound[barrier_type].play()
 
-        collision_buffer = 2
+        collision_buffer = 0
 
         #we move in the old velocity direction until the collision would happen
         pos[0] = prev_pos[0] + (time_to_collision * vel[0])
