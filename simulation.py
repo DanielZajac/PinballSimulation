@@ -19,9 +19,26 @@ PINB_TOP = 50
 PINB_BOTTOM = 0
 
 shapes = [] #List with all shape coords
+total_Frames = 0
+
+#Background Frames
+pygame.init()
+# Create the screen object
+# The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+imp = [] #List of all background frames
+
+# Set up Background frames
+imp.append(pygame.image.load("Pinball_Background\Pinball_1.png").convert())
+imp.append(pygame.image.load("Pinball_Background\Pinball_2.png").convert())
+imp.append(pygame.image.load("Pinball_Background\Pinball_3.png").convert())
+ 
+i = 0 #index for which background frame used
+
 
 #Debugging Flag - if true all collision shapes appear
-is_Debug = False
+is_Debug = True
 
 #Left Flipper properties
 l_rotated_point = (201, 910)
@@ -40,14 +57,9 @@ sound_file = "samplesound.wav"  # Change this to the path of your sound file
 sound = pygame.mixer.Sound(sound_file)
 
 #Ball properties
-<<<<<<< Updated upstream
-vel = [0,20]
-pos = [300,320]
-=======
 vel = [0,-150]
 pos = [762, 691]
->>>>>>> Stashed changes
-g = 0.05 # gamma (Drag Coeff)
+g = 0.005 # gamma (Drag Coeff)
 m = 1
 radius = 10
 
@@ -65,7 +77,7 @@ G = 9.8
 
 #sometimes we want to prevent collisions temporarily, like if the ball jumps really far in one step and clips into a platform, we need to get out
 #so while we are getting out we do not detect collisions from within the block
-collision_buffer = 0
+collision_buffer = 2
 
 def ball_update():
     global collision_buffer
@@ -90,7 +102,7 @@ def ball_update():
         if sound:
             sound.play()
 
-        collision_buffer = 10
+        collision_buffer = 2
 
         #we move in the old velocity direction until the collision would happen
         pos[0] = prev_pos[0] + (time_to_collision * vel[0])
@@ -129,12 +141,6 @@ from pygame.locals import (
     K_ESCAPE,
 )
 
-pygame.init()
-
-# Create the screen object
-# The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
 def init():
     # Order of List: Inner wall, R wall, L wall, Bottom wall, top wall, 
     # Top r tri, top l tri, bot l tri, bot r tri, diamond bumper, L bumper
@@ -153,7 +159,7 @@ def init():
     
     shapes.append([[164, 243],[140, 264], [190, 310], [241, 264], [217, 243]]) #diamond bumper
     shapes.append([list(rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345))),list(rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345))), list(rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345))), list(rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345))),  list(rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345))),  list(rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345))), list(rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345)))]) #L bumper
-    shapes.append([[340, 180],[340, 215], [420, 215], [420, 215]]) #square bumper
+    shapes.append([[340 + sq_x_offset, 180 + sq_y_offset], [340 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 260 + sq_y_offset], [420 + sq_x_offset, 180 + sq_y_offset]]) #square bumper
     shapes.append([[115,726],[115, 519],[210,726]]) #Left Tri Bumper
     shapes.append([[560,726],[665, 520],[665,726]]) #Right Tri Bumper
     
@@ -199,12 +205,17 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 print(f'Mouse clicked at ({x}, {y})')
+                
+    # Set up Background frames
+    imp[0] = pygame.image.load("Pinball_Background\Pinball_1.png").convert()
+    imp[1] = pygame.image.load("Pinball_Background\Pinball_2.png").convert()
+    imp[2] = pygame.image.load("Pinball_Background\Pinball_3.png").convert()
     
-    # Fill the background with white
-    imp = pygame.image.load("TPinBall_New.png").convert()
- 
 # Using blit to copy content from one surface to other
-    screen.blit(imp, (0, 0))
+    screen.blit(imp[i], (0, 0))
+    if i == 2: i = 0
+    elif total_Frames % 10 == 0: i += 1
+    
 
     if is_Debug:
         #Boarder prints
@@ -245,6 +256,7 @@ while running:
 
     # Flip the display
     pygame.display.flip()
+    total_Frames += 1
 
 
 pygame.quit()
