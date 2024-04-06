@@ -38,7 +38,7 @@ i = 0 #index for which background frame used
 
 
 #Debugging Flag - if true all collision shapes appear
-is_Debug = False
+is_Debug = True
 
 #Left Flipper properties
 l_rotated_point = (201, 910)
@@ -59,10 +59,10 @@ sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
 sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Ball properties
-vel = [0,-150]
-pos = [762, 691]
+vel = [-150,-20]
+pos = [300, 101]
 
-g = 0.005 # gamma (Drag Coeff)
+g = 0.05 # gamma (Drag Coeff)
 m = 1
 radius = 10
 
