@@ -22,6 +22,10 @@ shapes = [] #List with all shape coords
 total_Frames = 0
 lives = 3
 
+left_flipper_moving = False
+right_flipper_moving = False
+spring_moving = False
+
 #Background Frames
 pygame.init()
 # Create the screen object
@@ -39,7 +43,7 @@ i = 0 #index for which background frame used
 
 
 #Debugging Flag - if true all collision shapes appear
-is_Debug = True
+is_Debug = False
 
 #Left Flipper properties
 l_rotated_point = (201, 910)
@@ -65,7 +69,7 @@ sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
 
 #Ball properties
 
-vel = [0,100]
+vel = [0,0]
 start_pos = [763, 750]
 pos = copy.deepcopy(start_pos)
 g = 0.0005 # gamma (Drag Coeff)
@@ -83,7 +87,7 @@ sq_y_offset = 0
  
 #World properties
 dt = 0.05
-G = 9.8
+G = 60
 
 #sometimes we want to prevent collisions temporarily, like if the ball jumps really far in one step and clips into a platform, we need to get out
 #so while we are getting out we do not detect collisions from within the block
@@ -92,6 +96,8 @@ collision_buffer = 0
 def ball_update():
     global collision_buffer
     global sound
+    global flipper_moving
+    global spring_moving
 
     #every frame decrease the buffer length remaining if the buffer is active
     if collision_buffer > 0:
@@ -104,7 +110,7 @@ def ball_update():
     pos[0] += (dt * vel[0])
     pos[1] += (dt * vel[1])
 
-    isCollision, new_velocity, time_to_collision, barrier_type, object_number = pinball.better_collision(prev_pos, pos, vel, radius, shapes)
+    isCollision, new_velocity, time_to_collision, barrier_type, object_number = pinball.better_collision(prev_pos, pos, vel, radius, shapes, left_flipper_moving, right_flipper_moving, spring_moving)
     
     #if we are allowed to have a collision right now
     if isCollision and collision_buffer == 0:
@@ -190,26 +196,33 @@ while running:
     if keys[K_LEFT]:
         if L_angle > L_angle_start - 45:
             L_angle -= 3
+            left_flipper_moving = True
     
     if L_angle <= L_angle_start and not keys[K_LEFT]: #falls back to resting position
         L_angle += 2
+        left_flipper_moving = False
     
     # Right Flipper Movement    
     if keys[K_RIGHT]:
         if R_angle < R_angle_start + 45:
             R_angle += 3
+            right_flipper_moving = True
     
     if R_angle >= R_angle_start and not keys[K_RIGHT]: #falls back to resting position
         R_angle -= 2
+        right_flipper_moving = False
     
     # Spring Movement and d tracker
     if keys[K_s]:
         if d != max_d:
             d += 2
+            spring_moving = False
     
     if d > 0 and not keys[K_s]:
         d -= 4
+        spring_moving = True
     elif d < 0 and not keys[K_s]:
+        spring_moving = False
         d = 0
 
     if pos[1] >= 960: #if ball went down the hole run over
@@ -282,9 +295,8 @@ while running:
 
     #Spring
     pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
-    shapes[10] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
+    shapes[9] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
     #print(f"D = {pos}")
-    #print(f"D = {shapes[10]}")
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
     ball_update()

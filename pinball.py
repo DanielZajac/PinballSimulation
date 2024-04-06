@@ -28,39 +28,8 @@ def line_intersection(point1, point2, shape1, shape2):
 
     return x_intersect, y_intersect
 
-#error here allows us us to account for rounding error
-#for example if a collision line is flat, when we find the y_intersection with other lines it will round the value slightly so we need error to check it
-error = 0.005
-def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes):
-    #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
-    print(shapes[10])
-    for shape in shapes:
-        shape.append(shape[0])
-
-    #used later
-    num_shapes = len(shapes)
-
-    #need to find out the 'left' and 'right' sides of the ball, if we consider the 'top' the point mostforward in the direction the ball is going
-    #to do this, find the line perpindicular to the balls direction, and go 'radius' units in the positive and negative direction
-
-    #make the ball direction unit vector
-    length_ball_direction = np.sqrt(ball_velocity[0]**2 + ball_velocity[1]**2)
-    ball_direction_unit = [ball_velocity[0]/length_ball_direction, ball_velocity[1]/length_ball_direction]
-
-    #finding the right and left vector directions
-    right_direction = [ball_direction_unit[1], -ball_direction_unit[0]]
-    left_direction = [-ball_direction_unit[1], ball_direction_unit[0]]
-
-    #now find the left and right points of the ball (relative to direction) at start and end (before and after time step)
-    left_pos_increment = ball_radius * left_direction
-    left_pos_start = ball_pos_start + left_pos_increment
-    left_pos_end = ball_pos_end + left_pos_increment
-
-    right_pos_increment = ball_radius * right_direction
-    right_pos_start = ball_pos_start + right_pos_increment
-    right_pos_end = ball_pos_end + right_pos_increment
-    #now we want to check if any shape lines intersect these 'boundary lines' of our ball's travel path
-
+#so we can call this multiple times
+def end_of_path_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes, num_shapes, left_flipper_moving, right_flipper_moving, spring_moving):
     #first (and main) part of the collision detection system
     #now if there was no collision on the path, we will check for collisions near the end of the ball's travel
     potential_lines = []
@@ -133,9 +102,17 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
 
         #if the contact was with our flippers, we increase the force applied (the flippers in our game have a greater applied force when something hits them)
         if barrier_type == 2:
-            force_strength = 30
+            force_strength = 15
+            if left_flipper_moving and closest_line[5] == num_shapes - 2:
+                force_strength * 3
+            if right_flipper_moving and closest_line[5] == num_shapes - 1:
+                force_strength * 3
         elif barrier_type == 1:
             force_strength = 0
+
+        if closest_line[5] == 9:
+            if spring_moving:
+                force_strength = 350
 
         response_direction = np.array(closest_line[6])
         ball_velocity = np.array(ball_velocity)
@@ -155,8 +132,46 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         #distance/velocity to find time until collision
         collision_dt = distance_to_travel/velocity_magnitude
 
-        print("Good collision")
+        print("Good collision: object ", closest_line[5])
         return True, new_velocity, collision_dt, barrier_type, closest_line[5]
+    return False, [0, 0], 0, 0, 0
+
+#error here allows us us to account for rounding error
+#for example if a collision line is flat, when we find the y_intersection with other lines it will round the value slightly so we need error to check it
+error = 0.005
+def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes, left_flipper_moving, right_flipper_moving, spring_moving):
+    #we will fetch our shapes from simulation, and each shape will be a list of vertices (each with an x and y)
+    
+    for shape in shapes:
+        shape.append(shape[0])
+
+    #used later
+    num_shapes = len(shapes)
+
+    #need to find out the 'left' and 'right' sides of the ball, if we consider the 'top' the point mostforward in the direction the ball is going
+    #to do this, find the line perpindicular to the balls direction, and go 'radius' units in the positive and negative direction
+
+    #make the ball direction unit vector
+    length_ball_direction = np.sqrt(ball_velocity[0]**2 + ball_velocity[1]**2)
+    ball_direction_unit = [ball_velocity[0]/length_ball_direction, ball_velocity[1]/length_ball_direction]
+
+    #finding the right and left vector directions
+    right_direction = [ball_direction_unit[1], -ball_direction_unit[0]]
+    left_direction = [-ball_direction_unit[1], ball_direction_unit[0]]
+
+    #now find the left and right points of the ball (relative to direction) at start and end (before and after time step)
+    left_pos_increment = ball_radius * left_direction
+    left_pos_start = ball_pos_start + left_pos_increment
+    left_pos_end = ball_pos_end + left_pos_increment
+
+    right_pos_increment = ball_radius * right_direction
+    right_pos_start = ball_pos_start + right_pos_increment
+    right_pos_end = ball_pos_end + right_pos_increment
+    #now we want to check if any shape lines intersect these 'boundary lines' of our ball's travel path
+
+    isCollision, new_vel, col_dt, bar_type, object_number = end_of_path_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, shapes, num_shapes, left_flipper_moving, right_flipper_moving, spring_moving)
+    if isCollision:
+        return isCollision, new_vel, col_dt, bar_type, object_number
 
     #this will store the lines which intersect at least one of the ball's boundary lines on its travel path
     potential_lines = []
@@ -247,9 +262,18 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
 
         #if the contact was with our flippers, we increase the force applied (the flippers in our game have a greater applied force when something hits them)
         if barrier_type == 2:
-            force_strength = 30
+            force_strength = 15
+            if left_flipper_moving and closest_line[5] == num_shapes - 2:
+                force_strength * 3
+            if right_flipper_moving and closest_line[5] == num_shapes - 1:
+                force_strength * 3
+
         elif barrier_type == 1:
             force_strength = 0
+
+        if closest_line[5] == 9:
+            if spring_moving:
+                force_strength = 350
 
         #disregard the parallel component, replace it with a force in parallel direction and add it to the perpendicular component
         new_velocity = [(response_direction[0]*force_strength)+(-parallel_component[0])+perpendicular_component[0], (response_direction[1]*force_strength)+(-parallel_component[1])+perpendicular_component[1]]
