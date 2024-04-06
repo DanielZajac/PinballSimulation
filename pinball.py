@@ -133,13 +133,26 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         parallel_component = np.dot(ball_velocity, response_direction) * response_direction
         #calculate the component of velocity perpendicular to the normal
         perpendicular_component = ball_velocity - parallel_component
+
+
+        #barrier types: 1 = wall, 2 = flipper, 3 = bumper
+        barrier_type = 0
+        if closest_line[5] < 9:
+            barrier_type = 1
+        elif closest_line[5] >= num_shapes-2:
+            barrier_type = 2
+        else:
+            barrier_type = 3
         
         #calculting velocity after force is applied in direction of platform's normal vector
         force_strength = 15
 
         #if the contact was with our flippers, we increase the force applied (the flippers in our game have a greater applied force when something hits them)
-        if closest_line[5] >= num_shapes-2:
+        if barrier_type == 2:
             force_strength = 30
+        elif barrier_type == 1:
+            force_strength = 0
+
         #disregard the parallel component, replace it with a force in parallel direction and add it to the perpendicular component
         new_velocity = [(response_direction[0]*force_strength)+(-parallel_component[0])+perpendicular_component[0], (response_direction[1]*force_strength)+(-parallel_component[1])+perpendicular_component[1]]
 
@@ -155,16 +168,6 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
         #distance/velocity to find time until collision
         collision_dt = distance_to_travel/velocity_magnitude
 
-        #
-        barrier_type = 0
-        if closest_line[5] < 9:
-            barrier_type = 1
-        elif closest_line[5] >= num_shapes-2:
-            barrier_type = 2
-        else:
-            barrier_type = 3
-
-        #barrier types: 1 = wall, 2 = flipper, 3 = bumper
         return True, new_velocity, collision_dt, barrier_type
 
 
