@@ -20,16 +20,15 @@ PINB_BOTTOM = 0
 
 shapes = [] #List with all shape coords
 
-#Left Bumper properties
-l_x_offset = 10
-l_y_offset = 20
+#Debugging Flag - if true all collision shapes appear
+is_Debug = False
+
+#Left Flipper properties
 l_rotated_point = (201, 910)
 L_angle_start = 45
 L_angle = L_angle_start
 
-#Right Bumper properties
-r_x_offset = 10
-r_y_offset = 20
+#Right Flipper properties
 r_rotated_point = (549, 907)
 R_angle_start = -45
 R_angle = R_angle_start
@@ -41,11 +40,24 @@ sound_file = "samplesound.wav"  # Change this to the path of your sound file
 sound = pygame.mixer.Sound(sound_file)
 
 #Ball properties
+<<<<<<< Updated upstream
 vel = [0,20]
 pos = [300,320]
+=======
+vel = [0,-150]
+pos = [762, 691]
+>>>>>>> Stashed changes
 g = 0.05 # gamma (Drag Coeff)
 m = 1
 radius = 10
+
+#L Bumper properties
+l_x_offset = 0
+l_y_offset = -80
+
+#Square Bumper Properties
+sq_x_offset = 25
+sq_y_offset = 0
  
 #World properties
 dt = 0.05
@@ -141,9 +153,12 @@ def init():
     
     shapes.append([[164, 243],[140, 264], [190, 310], [241, 264], [217, 243]]) #diamond bumper
     shapes.append([list(rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345))),list(rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345))), list(rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345))), list(rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345))),  list(rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345))),  list(rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345))), list(rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345)))]) #L bumper
+    shapes.append([[340, 180],[340, 215], [420, 215], [420, 215]]) #square bumper
+    shapes.append([[115,726],[115, 519],[210,726]]) #Left Tri Bumper
+    shapes.append([[560,726],[665, 520],[665,726]]) #Right Tri Bumper
     
-    shapes.append([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left bumper (moving)
-    shapes.append([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right bumper (moving)
+    shapes.append([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left Flipper (moving)
+    shapes.append([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
 
 # Run until the user asks to quit
 running = True
@@ -186,32 +201,47 @@ while running:
                 print(f'Mouse clicked at ({x}, {y})')
     
     # Fill the background with white
-    screen.fill((255, 255, 255))
+    imp = pygame.image.load("TPinBall_New.png").convert()
+ 
+# Using blit to copy content from one surface to other
+    screen.blit(imp, (0, 0))
 
-    pygame.draw.rect(screen, (255,0,0), pygame.Rect(730, 250, WALL_WIDTH, 700)) #inner wall
-    pygame.draw.rect(screen, (255,0,0), pygame.Rect(780, PINB_TOP, WALL_WIDTH, 900)) #right wall
-    pygame.draw.rect(screen, (255,0,0), pygame.Rect(PINB_LEFT, PINB_TOP, WALL_WIDTH, 900)) #left wall
-    pygame.draw.rect(screen, (255,0,0), pygame.Rect(730, 940, 60, WALL_WIDTH)) # bottom wall
-    pygame.draw.rect(screen, (255,0,0), pygame.Rect(PINB_LEFT, PINB_TOP, 750, WALL_WIDTH)) #top wall
-    pygame.draw.polygon(screen, (255,0,0), ((785, 50),(785, 150),(675, 50))) #top right triangle
-    pygame.draw.polygon(screen, (255,0,0), ((35, 50),(35, 150),(145, 50))) #top left triangle
-    pygame.draw.polygon(screen, (255,0,0), ((35, 950),(35, 770),(255, 950))) #bottom left triangle
-    pygame.draw.polygon(screen, (255,0,0), ((730, 949),(730, 770),(510, 949))) #bottom right triangle
-
-    pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930), L_angle, l_rotated_point), rotated_points((200, 890), L_angle, l_rotated_point), rotated_points((320, 910), L_angle, l_rotated_point))) #left bumper
-    shapes[-2] = ([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left bumper (moving)
-    
-    pygame.draw.polygon(screen, (0,0,0), (rotated_points((550, 890), R_angle, r_rotated_point), rotated_points((550, 930),  R_angle, r_rotated_point), rotated_points((435, 910), R_angle, r_rotated_point))) #Right bumper
-    shapes[-1] = ([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right bumper (moving)
-
+    if is_Debug:
+        #Boarder prints
+        pygame.draw.rect(screen, (255,0,0), pygame.Rect(730, 250, WALL_WIDTH, 700)) #inner wall
+        pygame.draw.rect(screen, (255,0,0), pygame.Rect(780, PINB_TOP, WALL_WIDTH, 900)) #right wall
+        pygame.draw.rect(screen, (255,0,0), pygame.Rect(PINB_LEFT, PINB_TOP, WALL_WIDTH, 900)) #left wall
+        pygame.draw.rect(screen, (255,0,0), pygame.Rect(730, 940, 60, WALL_WIDTH)) # bottom wall
+        pygame.draw.rect(screen, (255,0,0), pygame.Rect(PINB_LEFT, PINB_TOP, 750, WALL_WIDTH)) #top wall
+        pygame.draw.polygon(screen, (255,0,0), ((785, 50),(785, 150),(675, 50))) #top right triangle
+        pygame.draw.polygon(screen, (255,0,0), ((35, 50),(35, 150),(145, 50))) #top left triangle
+        pygame.draw.polygon(screen, (255,0,0), ((35, 950),(35, 770),(255, 950))) #bottom left triangle
+        pygame.draw.polygon(screen, (255,0,0), ((730, 949),(730, 770),(510, 949))) #bottom right triangle
         
-    pygame.draw.polygon(screen, (0,255,0), ((164, 243),(140, 264), (190, 310), (241, 264), (217, 243))) #diamond bumper
-    pygame.draw.polygon(screen, (0,255,0), (rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345)), rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345)),  rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345)),  rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345)),  rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345)),  rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345)),  rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345)))) #l bumper
+        #Bumpers
+        pygame.draw.polygon(screen, (0,255,0), ((164 , 243),(140, 264), (190, 310), (241, 264), (217, 243))) #diamond bumper
+        pygame.draw.polygon(screen, (0,255,0), ((340 + sq_x_offset, 180 + sq_y_offset), (340 + sq_x_offset, 260 + sq_y_offset), (420 + sq_x_offset, 260 + sq_y_offset), (420 + sq_x_offset, 180 + sq_y_offset))) #square bumper
+        pygame.draw.polygon(screen, (255,0,0), ((113,726),(113, 519),(210,726))) #Left Tri Bumper
+        pygame.draw.polygon(screen, (255,0,0), ((560,726),(665, 520),(665,726))) #Right Tri Bumper
+        #L Bumper
+        pygame.draw.polygon(screen, (0,255,0), (rotated_points((530 + l_x_offset, 345 + l_y_offset), 45, (530, 345)), rotated_points((570+ l_x_offset, 345+ l_y_offset), 45, (530, 345)),  rotated_points((570+ l_x_offset, 515+ l_y_offset), 45, (530, 345)),  rotated_points((670+ l_x_offset, 515+ l_y_offset), 45, (530, 345)),  rotated_points((670+ l_x_offset, 545+ l_y_offset), 45, (530, 345)),  rotated_points((530+ l_x_offset, 545+ l_y_offset), 45, (530, 345)),  rotated_points((530+ l_x_offset,345+ l_y_offset), 45, (530, 345)))) #l bumper
+
+
+    #Flipper prints
+    #Left
+    pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930), L_angle, l_rotated_point), rotated_points((200, 890), L_angle, l_rotated_point), rotated_points((320, 910), L_angle, l_rotated_point))) #left Flipper
+    shapes[-2] = ([list(rotated_points((200, 930), L_angle, l_rotated_point)),list(rotated_points((200, 890), L_angle, l_rotated_point)),list(rotated_points((320, 910), L_angle, l_rotated_point))]) #left Flipper (moving)
+    
+    #Right
+    pygame.draw.polygon(screen, (0,0,0), (rotated_points((550, 890), R_angle, r_rotated_point), rotated_points((550, 930),  R_angle, r_rotated_point), rotated_points((435, 910), R_angle, r_rotated_point))) #Right Flipper
+    shapes[-1] = ([list(rotated_points((550, 890), R_angle, r_rotated_point)),list(rotated_points((550, 930), R_angle, r_rotated_point)),list(rotated_points((435, 910), R_angle, r_rotated_point))]) #Right Flipper (moving)
+
     
     pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius)
     ball_update()
     
     #print(pos)
+    
 
     # Flip the display
     pygame.display.flip()
