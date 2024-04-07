@@ -259,7 +259,7 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
             barrier_type = 3
         
         #calculting velocity after force is applied in direction of platform's normal vector
-        force_strength = 15
+        force_strength = 5
 
         #if the contact was with our flippers, we increase the force applied (the flippers in our game have a greater applied force when something hits them)
         if barrier_type == 2:
@@ -278,6 +278,9 @@ def better_collision(ball_pos_start, ball_pos_end, ball_velocity, ball_radius, s
 
         #disregard the parallel component, replace it with a force in parallel direction and add it to the perpendicular component
         new_velocity = [(response_direction[0]*force_strength)+(-parallel_component[0])+perpendicular_component[0], (response_direction[1]*force_strength)+(-parallel_component[1])+perpendicular_component[1]]
+        
+        if barrier_type == 1:
+            new_velocity = [(response_direction[0]*force_strength)+(-parallel_component[0]*0.3)+perpendicular_component[0], (response_direction[1]*force_strength)+(-parallel_component[1]*0.3)+perpendicular_component[1]]
 
         ball_collision_point_start = ball_pos_start + ball_radius*(ball_collision_direction_from_radius)
 
