@@ -195,7 +195,7 @@ from pygame.locals import (
     K_RIGHT,
     KEYDOWN,
     K_ESCAPE,
-    K_KP_ENTER,
+    K_RETURN,
     K_r,
     K_s,
     K_c,
@@ -271,9 +271,9 @@ while running:
                 pos = copy.deepcopy(start_pos)
                 vel = [0,0]
                 lives -= 1
+                spring_moving = False
                 if lives == 0:
                     running = False
-
 
     for event in pygame.event.get():
         if event.type == KEYDOWN:
@@ -284,15 +284,14 @@ while running:
                 pos = copy.deepcopy(start_pos)
                 vel = [0,0]
                 lives -= 1
+                spring_moving = False
                 if lives == 0:
                     running = False
             
             if event.key == K_c and imp_switch % 2 != 0:
                 imp_switch += 1
-            if event.key == K_KP_ENTER and imp_switch % 2 == 0:
-                imp_switch += 1
-               
-                    
+            if event.key == K_RETURN and imp_switch % 2 == 0:
+                imp_switch += 1     
                     
         if event.type == pygame.QUIT:
             running = False
@@ -310,8 +309,7 @@ while running:
         screen.blit(imp[i], (-1, -3))
         if i == 2: i = 0
         elif total_Frames % 10 == 0: i += 1
-    
-    print(imp_switch)
+
     if is_Debug:
         #Boarder prints
         pygame.draw.rect(screen, (255,0,0), pygame.Rect(730, 250, WALL_WIDTH, 700)) #inner wall
