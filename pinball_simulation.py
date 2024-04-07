@@ -279,7 +279,7 @@ while running:
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
-            if event.key == K_r: #if run reset
+            if event.key == K_r and imp_switch % 2 != 0: #if run reset
                 draw_popup()
                 pos = copy.deepcopy(start_pos)
                 vel = [0,0]
