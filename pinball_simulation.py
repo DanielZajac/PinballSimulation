@@ -98,7 +98,7 @@ sq_y_offset = 0
  
 #World properties
 dt = 0.05
-G = 100
+G = 70
 
 def draw_popup():
     popup_surface = pygame.Surface((200, 100))  # Create a surface for the pop-up
@@ -341,19 +341,20 @@ while running:
     #Right
     pygame.draw.polygon(screen, (0,0,0), (rotated_points((550+ R_Flip_x, 890+ R_Flip_y), R_angle, R_rotated_point), rotated_points((550+ R_Flip_x, 930+ R_Flip_y),  R_angle, R_rotated_point), rotated_points((435+ R_Flip_x, 910+ R_Flip_y), R_angle, R_rotated_point))) #Right Flipper
     shapes[-1] = ([list(rotated_points((550+ R_Flip_x, 890+ R_Flip_y), R_angle, R_rotated_point)),list(rotated_points((550+ R_Flip_x, 930+ R_Flip_y), R_angle, R_rotated_point)),list(rotated_points((435+ R_Flip_x, 910+ R_Flip_y), R_angle, R_rotated_point))]) #Right Flipper (moving)
+    
+    if imp_switch % 2 != 0:
+        #Spring
+        pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
 
-    #Spring
-    pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
-
-    shapes[9] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
+        shapes[9] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
 
     #print(f"D = {pos}")
-    if imp_switch % 2 != 0:
+    
         pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius) #Ball Update
         ball_update()
     
-    text_surface = Game_Text.render(f'Points = {points}        Balls Remaining = {lives}', False, (0, 0, 0))
-    screen.blit(text_surface, (200,0))
+    text_surface = Game_Text.render(f'Points = {points}        Balls Remaining = {lives}       (Press C for Controls)', False, (0, 0, 0))
+    screen.blit(text_surface, (50,0))
 
     # Flip the display
     pygame.display.flip()
