@@ -40,12 +40,12 @@ Game_Text = pygame.font.Font("DeterminationSansWebRegular-369X.ttf", 30)
 imp = [] #List of all background frames
 
 # Set up Background frames
-imp.append(pygame.image.load("Pinball_Background\PinBall_1.png").convert())
-imp.append(pygame.image.load("Pinball_Background\PinBall_2.png").convert())
-imp.append(pygame.image.load("Pinball_Background\PinBall_3.png").convert())
+imp.append(pygame.image.load("PinBall_1.png").convert())
+imp.append(pygame.image.load("PinBall_2.png").convert())
+imp.append(pygame.image.load("PinBall_3.png").convert())
 
 #set up Options menu
-option = pygame.image.load("Pinball_Background\PinBall_Option.jpg").convert()
+option = pygame.image.load("PinBall_Option.jpg").convert()
 
 imp_switch = 1 #A number switch to help switch from game to options
  
@@ -56,9 +56,9 @@ i = 0 #index for which background frame used
 pygame.mixer.init()
 
 sound = [-1] * 4 #will hold all sound to then use later
-sound[1] = pygame.mixer.Sound("Sounds\samplesound.wav")
-sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
-sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
+sound[1] = pygame.mixer.Sound("samplesound.wav")
+sound[2] = pygame.mixer.Sound("multifellovo.wav")
+sound[3] = pygame.mixer.Sound("sproing.wav")
 
 #Debugging Flag - if true all collision shapes appear
 is_Debug = False
