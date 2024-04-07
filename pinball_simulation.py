@@ -40,31 +40,40 @@ Game_Text = pygame.font.Font("DeterminationSansWebRegular-369X.ttf", 30)
 imp = [] #List of all background frames
 
 # Set up Background frames
-imp.append(pygame.image.load("Pinball_Background\PinBall_1.png").convert())
-imp.append(pygame.image.load("Pinball_Background\PinBall_2.png").convert())
-imp.append(pygame.image.load("Pinball_Background\PinBall_3.png").convert())
+imp.append(pygame.image.load("PinBall_1.png").convert())
+imp.append(pygame.image.load("PinBall_2.png").convert())
+imp.append(pygame.image.load("PinBall_3.png").convert())
+
+#set up Options menu
+option = pygame.image.load("PinBall_Option.jpg").convert()
+
+imp_switch = 1 #A number switch to help switch from game to options
  
 i = 0 #index for which background frame used
+
 
 #Import sound mixer
 pygame.mixer.init()
 
 sound = [-1] * 4 #will hold all sound to then use later
-sound[1] = pygame.mixer.Sound("Sounds\samplesound.wav")
-sound[2] = pygame.mixer.Sound("Sounds\Pinball\multifellovo.wav")
-sound[3] = pygame.mixer.Sound("Sounds\Pinball\sproing.wav")
+sound[1] = pygame.mixer.Sound("samplesound.wav")
+sound[2] = pygame.mixer.Sound("multifellovo.wav")
+sound[3] = pygame.mixer.Sound("sproing.wav")
 
 #Debugging Flag - if true all collision shapes appear
 is_Debug = False
 
 #Left Flipper properties
-L_rotated_point = (201, 910)
-L_angle_start = 45
+L_Flip_y = 25
+L_rotated_point = (201, 910 + L_Flip_y)
+L_angle_start = 30
 L_angle = L_angle_start
 
 #Right Flipper properties
-R_rotated_point = (549, 907)
-R_angle_start = -45
+R_Flip_y = 30
+R_Flip_x = 10
+R_rotated_point = (549+ R_Flip_x, 907 + R_Flip_y)
+R_angle_start = -30
 R_angle = R_angle_start
 
 #Spring properties
@@ -72,8 +81,8 @@ d = 0
 max_d = 80
 
 #Ball properties
-vel = [0, 0]
-start_pos = [763, 760]
+vel = [0, 1]
+start_pos = [763, 800]
 pos = copy.deepcopy(start_pos)
 m = 10
 radius = 15
@@ -89,8 +98,25 @@ sq_y_offset = 0
  
 #World properties
 dt = 0.05
-G = 65
+G = 100
 
+def draw_popup():
+    popup_surface = pygame.Surface((200, 100))  # Create a surface for the pop-up
+    popup_surface.fill((1,1,1))  # Fill the surface with white color
+    popup_rect = popup_surface.get_rect()
+    popup_rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # Center the pop-up on the screen
+
+    # Draw the outline of the pop-up
+    pygame.draw.rect(popup_surface, (0,0,0), popup_rect, 2)
+
+    # Add text to the pop-up
+    font = pygame.font.Font(None, 24)
+    text_surface = font.render("This is a pop-up!", True, (0,0,0))
+    text_rect = text_surface.get_rect(center=popup_rect.center)
+    popup_surface.blit(text_surface, text_rect)
+
+    screen.blit(popup_surface, popup_rect)
+    
 #sometimes we want to prevent collisions temporarily, like if the ball jumps really far in one step and clips into a platform, we need to get out
 #so while we are getting out we do not detect collisions from within the block
 collision_buffer = 0
@@ -169,8 +195,10 @@ from pygame.locals import (
     K_RIGHT,
     KEYDOWN,
     K_ESCAPE,
+    K_KP_ENTER,
     K_r,
     K_s,
+    K_c,
 )
 
 def init():
@@ -197,8 +225,8 @@ def init():
     shapes.append([[115,726],[115, 519],[210,726]]) #Left Tri Bumper
     shapes.append([[560,726],[665, 520],[665,726]]) #Right Tri Bumper
     
-    shapes.append([list(rotated_points((200, 930), L_angle, L_rotated_point)),list(rotated_points((200, 890), L_angle, L_rotated_point)),list(rotated_points((320, 910), L_angle, L_rotated_point))]) #left Flipper (moving)
-    shapes.append([list(rotated_points((550, 890), R_angle, R_rotated_point)),list(rotated_points((550, 930), R_angle, R_rotated_point)),list(rotated_points((435, 910), R_angle, R_rotated_point))]) #Right Flipper (moving)
+    shapes.append([list(rotated_points((200, 930 + L_Flip_y), L_angle, L_rotated_point)),list(rotated_points((200, 890 + L_Flip_y), L_angle, L_rotated_point)),list(rotated_points((320, 910 + L_Flip_y), L_angle, L_rotated_point))]) #left Flipper (moving)
+    shapes.append([list(rotated_points((550+ R_Flip_x, 890 + R_Flip_y), R_angle, R_rotated_point)),list(rotated_points((550+ R_Flip_x, 930 + R_Flip_y), R_angle, R_rotated_point)),list(rotated_points((435+ R_Flip_x, 910+ R_Flip_y), R_angle, R_rotated_point))]) #Right Flipper (moving)
 
 # Run until the user asks to quit
 running = True
@@ -246,17 +274,26 @@ while running:
                 if lives == 0:
                     running = False
 
-    # Did the user click the window close button?
+
     for event in pygame.event.get():
         if event.type == KEYDOWN:
             if event.key == K_ESCAPE:
                 running = False
             if event.key == K_r: #if run reset
+                draw_popup()
                 pos = copy.deepcopy(start_pos)
                 vel = [0,0]
                 lives -= 1
                 if lives == 0:
                     running = False
+            
+            if event.key == K_c and imp_switch % 2 != 0:
+                imp_switch += 1
+            if event.key == K_KP_ENTER and imp_switch % 2 == 0:
+                imp_switch += 1
+               
+                    
+                    
         if event.type == pygame.QUIT:
             running = False
 
@@ -267,11 +304,14 @@ while running:
     
 # Using blit to copy content from one surface to other
 
-    screen.blit(imp[i], (-1, -3))
-    if i == 2: i = 0
-    elif total_Frames % 10 == 0: i += 1
-
+    if imp_switch % 2 == 0:
+        screen.blit(option, (-1, -3))
+    else:
+        screen.blit(imp[i], (-1, -3))
+        if i == 2: i = 0
+        elif total_Frames % 10 == 0: i += 1
     
+    print(imp_switch)
     if is_Debug:
         #Boarder prints
         pygame.draw.rect(screen, (255,0,0), pygame.Rect(730, 250, WALL_WIDTH, 700)) #inner wall
@@ -295,12 +335,12 @@ while running:
 
     #Flipper prints
     #Left
-    pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930), L_angle, L_rotated_point), rotated_points((200, 890), L_angle, L_rotated_point), rotated_points((320, 910), L_angle, L_rotated_point))) #left Flipper
-    shapes[-2] = ([list(rotated_points((200, 930), L_angle, L_rotated_point)),list(rotated_points((200, 890), L_angle, L_rotated_point)),list(rotated_points((320, 910), L_angle, L_rotated_point))]) #left Flipper (moving)
+    pygame.draw.polygon(screen, (0,0,0), (rotated_points((200, 930 + L_Flip_y), L_angle, L_rotated_point), rotated_points((200, 890+ L_Flip_y), L_angle, L_rotated_point), rotated_points((320, 910+ L_Flip_y), L_angle, L_rotated_point))) #left Flipper
+    shapes[-2] = ([list(rotated_points((200, 930+ L_Flip_y), L_angle, L_rotated_point)),list(rotated_points((200, 890+ L_Flip_y), L_angle, L_rotated_point)),list(rotated_points((320, 910+ L_Flip_y), L_angle, L_rotated_point))]) #left Flipper (moving)
     
     #Right
-    pygame.draw.polygon(screen, (0,0,0), (rotated_points((550, 890), R_angle, R_rotated_point), rotated_points((550, 930),  R_angle, R_rotated_point), rotated_points((435, 910), R_angle, R_rotated_point))) #Right Flipper
-    shapes[-1] = ([list(rotated_points((550, 890), R_angle, R_rotated_point)),list(rotated_points((550, 930), R_angle, R_rotated_point)),list(rotated_points((435, 910), R_angle, R_rotated_point))]) #Right Flipper (moving)
+    pygame.draw.polygon(screen, (0,0,0), (rotated_points((550+ R_Flip_x, 890+ R_Flip_y), R_angle, R_rotated_point), rotated_points((550+ R_Flip_x, 930+ R_Flip_y),  R_angle, R_rotated_point), rotated_points((435+ R_Flip_x, 910+ R_Flip_y), R_angle, R_rotated_point))) #Right Flipper
+    shapes[-1] = ([list(rotated_points((550+ R_Flip_x, 890+ R_Flip_y), R_angle, R_rotated_point)),list(rotated_points((550+ R_Flip_x, 930+ R_Flip_y), R_angle, R_rotated_point)),list(rotated_points((435+ R_Flip_x, 910+ R_Flip_y), R_angle, R_rotated_point))]) #Right Flipper (moving)
 
     #Spring
     pygame.draw.polygon(screen, (255,0,0), ((742, 840 + d),(782, 840 + d),(782, 865 + d), (742, 865 + d))) #Spring box
@@ -308,12 +348,12 @@ while running:
     shapes[9] = [[742, 840 + d],[782, 840 + d],[782, 865 + d], [742, 865 + d]]
 
     #print(f"D = {pos}")
+    if imp_switch % 2 != 0:
+        pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius) #Ball Update
+        ball_update()
     
-    pygame.draw.circle(screen, (0, 0, 255), (pos[0], pos[1]), radius) #Ball Update
-    ball_update()
-    
-    text_surface = Game_Text.render(f'Points = {points}', False, (0, 0, 0))
-    screen.blit(text_surface, (300,0))
+    text_surface = Game_Text.render(f'Points = {points}        Balls Remaining = {lives}', False, (0, 0, 0))
+    screen.blit(text_surface, (200,0))
 
     # Flip the display
     pygame.display.flip()
