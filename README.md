@@ -13,7 +13,7 @@ This simulation is mainly focused on creating an accurate collision detection an
 ##### Note:
 If you run the file and the pygame window is partially cut off, then you can either change your display zoom in your computer's settings - 
 ##### Windows: Settings->System->Display->Scale and Layout
-##### Mac "temp" 
+##### Mac: System Settings->Displays->More Space
 or you can find the following line in pinball_simulation.py:
 
 ##### screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
